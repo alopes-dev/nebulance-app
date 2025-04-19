@@ -1,5 +1,7 @@
 import { StatusBar } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import AuthNavigator from "@/navigation/AuthNavigator";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
@@ -25,8 +27,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <BottomSheetModalProvider>
+          <AppContent />
+        </BottomSheetModalProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

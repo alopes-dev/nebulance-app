@@ -6,9 +6,10 @@ import * as S from "./GoalCard.styles";
 
 interface GoalCardProps {
   goal: Goal;
+  onPress: () => void;
 }
 
-const GoalCard: React.FC<GoalCardProps> = ({ goal }) => {
+const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
   const { title, targetAmount, currentAmount, deadline, icon, color } = goal;
 
   const percentage = Math.round((currentAmount / targetAmount) * 100);
@@ -52,7 +53,7 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal }) => {
 
       <S.FooterContainer>
         <S.RemainingText>${remaining.toLocaleString()} left</S.RemainingText>
-        <S.AddFundsButton>
+        <S.AddFundsButton onPress={onPress}>
           <S.AddFundsText>Add Funds</S.AddFundsText>
         </S.AddFundsButton>
       </S.FooterContainer>
