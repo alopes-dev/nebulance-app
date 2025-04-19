@@ -92,7 +92,7 @@ const TransactionUploadScreen = () => {
             <Ionicons name="arrow-back" size={24} color="#333" />
           </S.BackButton>
           <S.HeaderTitle>Import Transactions</S.HeaderTitle>
-          <S.CloseButton onPress={() => navigation.navigate("Transactions")}>
+          <S.CloseButton onPress={() => navigation.goBack()}>
             <Ionicons name="close" size={24} color="#333" />
           </S.CloseButton>
         </S.Header>
