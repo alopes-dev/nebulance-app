@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 
 import HomeScreen from "@/screens/home/HomeScreen";
-import TransactionsScreen from "@/screens/transactions/TransactionsScreen";
+import { TransactionsStack } from "./TransactionsStack";
 import GoalsScreen from "@/screens/goals/GoalsScreen";
 import ProfileScreen from "@/screens/profile/ProfileScreen";
 import { useTheme } from "@/context/ThemeContext";
@@ -44,7 +44,7 @@ export const MainTabs = () => {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Transactions" component={TransactionsScreen} />
+      <Tab.Screen name="Transactions" component={TransactionsStack} />
       <Tab.Screen name="Goals" component={GoalsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

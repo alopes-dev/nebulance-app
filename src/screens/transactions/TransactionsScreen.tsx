@@ -104,7 +104,7 @@ const TransactionsScreen = () => {
           <S.HeaderTitle>Transactions</S.HeaderTitle>
           <S.ActionButtonsContainer>
             <S.ActionButton onPress={handleImportTransactions}>
-              <Ionicons name="cloud-upload-outline" size={20} color="#333" />
+              <S.IoniconsStyle name="cloud-upload-outline" size={20} />
             </S.ActionButton>
             <S.ActionButton>
               <Ionicons name="search-outline" size={20} color="#333" />

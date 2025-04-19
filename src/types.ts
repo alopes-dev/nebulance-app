@@ -7,6 +7,7 @@ export interface Transaction {
   date: Date;
   category: string;
   icon: string;
+  isExpense?: boolean;
 }
 
 export interface Goal {

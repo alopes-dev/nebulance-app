@@ -3,7 +3,10 @@ import { Ionicons } from "@expo/vector-icons";
 import type { Transaction } from "@/types";
 
 import * as S from "./TransactionItem.styles";
-
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { TransactionsStackParamList } from "@/navigation/TransactionsStack";
+import { ITransactionDetailsNavigationProp } from "@/navigation/Navigation.types";
 interface TransactionItemProps {
   transaction: Transaction;
   expanded?: boolean;
@@ -13,6 +16,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
   transaction,
   expanded = false,
 }) => {
+  const navigation = useNavigation<ITransactionDetailsNavigationProp>();
   const { title, amount, date, category, icon } = transaction;
   const isExpense = amount < 0;
 
@@ -23,7 +27,16 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
   });
 
   return (
-    <S.ItemContainer>
+    <S.ItemContainer
+      onPress={() =>
+        navigation.navigate("TransactionDetails", {
+          transaction: {
+            ...transaction,
+            isExpense,
+          },
+        })
+      }
+    >
       <S.IconContainer isExpense={isExpense}>
         <Ionicons name={icon as any} size={20} color="#FFFFFF" />
       </S.IconContainer>
