@@ -5,6 +5,10 @@ import GoalCard from "@/components/goal-card/GoalCard";
 import type { Goal } from "@/types";
 
 import * as S from "./GoalsScreen.styles";
+import { useRef, useState } from "react";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import AddFundsModal from "@/components/add-funds-modal/AddFundsModal";
+
 const mockGoals: Goal[] = [
   {
     id: "1",
@@ -45,6 +49,24 @@ const mockGoals: Goal[] = [
 ];
 
 const GoalsScreen = () => {
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+
+  const handleAddFunds = (amount: number) => {
+    if (selectedGoal) {
+      // Here you would typically update the goal in your backend
+      console.log(`Adding ${amount} to goal ${selectedGoal.id}`);
+      // Update local state if needed
+    }
+  };
+
+  const handleGoalPress = (goal: Goal) => {
+    setSelectedGoal(goal);
+    if (bottomSheetModalRef.current) {
+      bottomSheetModalRef.current.present();
+    }
+  };
+
   return (
     <S.RootContainer>
       <S.Container>
@@ -91,13 +113,24 @@ const GoalsScreen = () => {
 
         <ScrollView showsVerticalScrollIndicator={false}>
           {mockGoals.map((goal) => (
-            <GoalCard key={goal.id} goal={goal} />
+            <GoalCard
+              key={goal.id}
+              goal={goal}
+              onPress={() => handleGoalPress(goal)}
+            />
           ))}
         </ScrollView>
 
         <S.AddButton>
           <Ionicons name="add" size={24} color="#FFFFFF" />
         </S.AddButton>
+
+        <AddFundsModal
+          goalId={selectedGoal?.id ?? ""}
+          goalTitle={selectedGoal?.title ?? ""}
+          onAddFunds={handleAddFunds}
+          bottomSheetModalRef={bottomSheetModalRef}
+        />
       </S.Container>
     </S.RootContainer>
   );
