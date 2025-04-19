@@ -5,6 +5,7 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import AuthNavigator from "@/navigation/AuthNavigator";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
+import { TransactionProvider } from "@/context/TransactionContext";
 import { useState } from "react";
 import MainNavigator from "./navigation/MainNavigator";
 
@@ -29,9 +30,11 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
-        <BottomSheetModalProvider>
-          <AppContent />
-        </BottomSheetModalProvider>
+        <TransactionProvider>
+          <BottomSheetModalProvider>
+            <AppContent />
+          </BottomSheetModalProvider>
+        </TransactionProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
   );

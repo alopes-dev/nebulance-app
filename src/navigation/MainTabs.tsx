@@ -5,6 +5,7 @@ import HomeScreen from "@/screens/home/HomeScreen";
 import { TransactionsStack } from "./TransactionsStack";
 import GoalsScreen from "@/screens/goals/GoalsScreen";
 import ProfileScreen from "@/screens/profile/ProfileScreen";
+import { FinancialCalendarScreen } from "@/screens/financial-calendar/FinancialCalendarScreen";
 import { useTheme } from "@/context/ThemeContext";
 
 const Tab = createBottomTabNavigator();
@@ -26,6 +27,8 @@ export const MainTabs = () => {
             iconName = focused ? "flag" : "flag-outline";
           } else if (route.name === "Profile") {
             iconName = focused ? "person" : "person-outline";
+          } else if (route.name === "Calendar") {
+            iconName = focused ? "calendar" : "calendar-outline";
           }
 
           return <Ionicons name={iconName as any} size={size} color={color} />;
@@ -45,6 +48,7 @@ export const MainTabs = () => {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Transactions" component={TransactionsStack} />
+      <Tab.Screen name="Calendar" component={FinancialCalendarScreen} />
       <Tab.Screen name="Goals" component={GoalsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
