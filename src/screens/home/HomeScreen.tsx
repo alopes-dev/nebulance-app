@@ -9,6 +9,11 @@ import type { Transaction } from "@/types";
 
 import * as S from "./HomeScreen.styles";
 import { useNavigation } from "@react-navigation/native";
+import {
+  ITransactionListNavigationProp,
+  ITransactionsStackNavigationProp,
+} from "@/navigation/Navigation.types";
+import { useOwnNavigation } from "@/hooks/use-own-navigation";
 
 const mockTransactions: Transaction[] = [
   {
@@ -48,10 +53,12 @@ const mockTransactions: Transaction[] = [
 const HomeScreen = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
   const { isDarkMode } = useTheme();
-  const navigation = useNavigation();
+  const navigation = useOwnNavigation();
 
   const handleViewAll = () => {
-    navigation.navigate("Transactions" as never);
+    navigation.navigate("MainTabs", {
+      screen: "Transactions",
+    });
   };
 
   return (

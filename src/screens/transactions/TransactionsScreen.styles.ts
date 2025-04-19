@@ -1,6 +1,6 @@
 import styled from "styled-components/native";
 import { ThemeProps } from "@/types";
-
+import { Ionicons } from "@expo/vector-icons";
 export const RootContainer = styled.SafeAreaView`
   flex: 1;
   background-color: ${(props: ThemeProps) => props.theme.colors.background};
@@ -38,6 +38,10 @@ export const ActionButton = styled.TouchableOpacity`
   justify-content: center;
   align-items: center;
   margin-left: ${(props: ThemeProps) => props.theme.spacing.sm}px;
+`;
+
+export const IoniconsStyle = styled(Ionicons)`
+  color: ${(props: ThemeProps) => props.theme.colors.primary};
 `;
 
 export const FilterContainer = styled.View`
