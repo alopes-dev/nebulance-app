@@ -1,14 +1,12 @@
 import React from "react";
 import { Calendar } from "react-native-calendars";
 import { useTheme } from "@/context/ThemeContext";
-import { useTransactions } from "@/context/TransactionContext";
 import * as S from "./FinancialCalendarScreen.styles";
 import { CalendarLegend } from "@/components/financial-calendar/CalendarLegend";
 import { useFinancialCalendar } from "@/hooks/useFinancialCalendar";
 import { useAuth } from "@/context/AuthContext";
 export const FinancialCalendarScreen = () => {
   const { theme } = useTheme();
-  // const { balance } = useTransactions();
   const { accountInfo } = useAuth();
   const { markedDates } = useFinancialCalendar({
     balance: accountInfo?.balance || 0,

@@ -7,7 +7,6 @@ import { queryClient } from "@/lib/react-query";
 
 import AuthNavigator from "@/navigation/AuthNavigator";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
-import { TransactionProvider } from "@/context/TransactionContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import MainNavigator from "./navigation/MainNavigator";
 
@@ -48,11 +47,9 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider>
-            <TransactionProvider>
-              <BottomSheetModalProvider>
-                <AppContent />
-              </BottomSheetModalProvider>
-            </TransactionProvider>
+            <BottomSheetModalProvider>
+              <AppContent />
+            </BottomSheetModalProvider>
           </ThemeProvider>
         </AuthProvider>
       </QueryClientProvider>

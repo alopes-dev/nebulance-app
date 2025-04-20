@@ -1,107 +1,49 @@
-import { useState } from "react";
-import { ScrollView } from "react-native";
+import { useState, useCallback, useRef } from "react";
+import { ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 import TransactionItem from "@/components/transaction-item/TransactionItem";
+import TransactionForm from "@/components/transaction-form/TransactionForm";
 
 import type { Transaction } from "@/types";
 
 import * as S from "./TransactionsScreen.styles";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/context/ThemeContext";
-
-const mockTransactions: Transaction[] = [
-  {
-    id: "1",
-    title: "Grocery Shopping",
-    amount: -85.75,
-    date: new Date("2023-04-15"),
-    category: "FOOD",
-    type: "expense",
-    icon: "basket",
-  },
-  {
-    id: "2",
-    title: "Salary Deposit",
-    amount: 2500.0,
-    date: new Date("2023-04-10"),
-    category: "FOOD",
-    type: "income",
-    icon: "cash",
-  },
-  {
-    id: "3",
-    title: "Netflix Subscription",
-    amount: -15.99,
-    date: new Date("2023-04-05"),
-    category: "ENTERTAINMENT",
-    type: "expense",
-    icon: "film",
-  },
-  {
-    id: "4",
-    title: "Uber Ride",
-    amount: -24.5,
-    date: new Date("2023-04-03"),
-    category: "TRANSPORT",
-    type: "expense",
-    icon: "car",
-  },
-  {
-    id: "5",
-    title: "Amazon Purchase",
-    amount: -67.99,
-    date: new Date("2023-04-02"),
-    category: "SHOPPING",
-    type: "expense",
-    icon: "cart",
-  },
-  {
-    id: "6",
-    title: "Freelance Payment",
-    amount: 350.0,
-    date: new Date("2023-04-01"),
-    category: "FOOD",
-    type: "income",
-    icon: "cash",
-  },
-  {
-    id: "7",
-    title: "Electric Bill",
-    amount: -75.4,
-    date: new Date("2023-03-28"),
-    category: "UTILITIES",
-    type: "expense",
-    icon: "flash",
-  },
-  {
-    id: "8",
-    title: "Gym Membership",
-    amount: -35.0,
-    date: new Date("2023-03-25"),
-    category: "HEALTHCARE",
-    type: "expense",
-    icon: "fitness",
-  },
-];
+import { useTransactionsQueries } from "@/hooks/useTransactionsQueries";
 
 const TransactionsScreen = () => {
   const navigation = useNavigation();
   const [filter, setFilter] = useState("all");
   const { isDarkMode, theme } = useTheme();
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const { transactions, isLoadingTransactions, refetch } =
+    useTransactionsQueries();
+  const [refreshing, setRefreshing] = useState(false);
 
   const filteredTransactions =
     filter === "all"
-      ? mockTransactions
+      ? transactions
       : filter === "income"
-      ? mockTransactions.filter((t) => t.amount > 0)
-      : mockTransactions.filter((t) => t.amount < 0);
+      ? transactions?.filter((t) => t.amount > 0)
+      : transactions?.filter((t) => t.amount < 0);
+
+  const handlePresentModal = useCallback(() => {
+    bottomSheetRef.current?.present();
+  }, []);
 
   const handleAddTransaction = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    // In a real app, this would navigate to a transaction form
-    console.log("Add transaction");
+    handlePresentModal();
+  };
+
+  const handleSubmitTransaction = (
+    transaction: Omit<Transaction, "id" | "date">
+  ) => {
+    // Here you would typically save the transaction
+    console.log("New transaction:", transaction);
   };
 
   const handleImportTransactions = () => {
@@ -114,6 +56,13 @@ const TransactionsScreen = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setFilter(filter);
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
+
   return (
     <S.RootContainer>
       <S.Container>
@@ -154,20 +103,38 @@ const TransactionsScreen = () => {
           </S.FilterButton>
         </S.FilterContainer>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {filteredTransactions.map((transaction) => (
-            <TransactionItem
-              key={transaction.id}
-              transaction={transaction}
-              expanded
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={theme.colors.text}
             />
-          ))}
+          }
+        >
+          {isLoadingTransactions ? (
+            <ActivityIndicator size="large" color={theme.colors.text} />
+          ) : (
+            filteredTransactions?.map((transaction) => (
+              <TransactionItem
+                key={transaction.id}
+                transaction={transaction}
+                expanded
+              />
+            ))
+          )}
         </ScrollView>
 
         <S.AddButton onPress={handleAddTransaction}>
           <Ionicons name="add" size={24} color="#FFFFFF" />
         </S.AddButton>
       </S.Container>
+
+      <TransactionForm
+        bottomSheetRef={bottomSheetRef}
+        onSubmit={handleSubmitTransaction}
+      />
     </S.RootContainer>
   );
 };

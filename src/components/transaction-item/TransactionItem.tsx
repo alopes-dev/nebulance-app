@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TransactionsStackParamList } from "@/navigation/TransactionsStack";
 import { ITransactionDetailsNavigationProp } from "@/navigation/Navigation.types";
+import { CATEGORY_ITEMS, TRANSACTIONS_ICONS_MAPS } from "@/helpers";
 interface TransactionItemProps {
   transaction: Transaction;
   expanded?: boolean;
@@ -17,8 +18,8 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
   expanded = false,
 }) => {
   const navigation = useNavigation<ITransactionDetailsNavigationProp>();
-  const { title, amount, date, category, type, icon } = transaction;
-  const isExpense = type === "expense";
+  const { description: title, amount, date, category, type } = transaction;
+  const isExpense = type?.toLowerCase() === "expense";
 
   // Format date
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
@@ -38,7 +39,14 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
       }
     >
       <S.IconContainer isExpense={isExpense}>
-        <Ionicons name={icon as any} size={20} color="#FFFFFF" />
+        <Ionicons
+          name={
+            (TRANSACTIONS_ICONS_MAPS.find((item) => item.category === category)
+              ?.icon as any) || "cash"
+          }
+          size={20}
+          color="#FFFFFF"
+        />
       </S.IconContainer>
 
       <S.ContentContainer>
@@ -51,7 +59,9 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
 
         {expanded && (
           <S.DetailsContainer>
-            <S.Detail>{type}</S.Detail>
+            <S.Detail>
+              {CATEGORY_ITEMS.find((item) => item.value === category)?.label}
+            </S.Detail>
             <S.Detail>{formattedDate}</S.Detail>
           </S.DetailsContainer>
         )}

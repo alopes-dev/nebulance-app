@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { ScrollView, TouchableOpacity } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import { ActivityIndicator, ScrollView, TouchableOpacity } from "react-native";
 import { useTheme } from "../../context/ThemeContext";
 
 import BalanceCard from "@/components/balance-card/BalanceCard";
@@ -12,50 +12,16 @@ import * as S from "./HomeScreen.styles";
 import { useOwnNavigation } from "@/hooks/use-own-navigation";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "@/context/AuthContext";
-const mockTransactions: Transaction[] = [
-  {
-    id: "1",
-    title: "Grocery Shopping",
-    amount: -85.75,
-    date: new Date("2023-04-15"),
-    category: "FOOD",
-    type: "expense",
-    icon: "basket",
-  },
-  {
-    id: "2",
-    title: "Salary Deposit",
-    amount: 2500.0,
-    date: new Date("2023-04-10"),
-    category: "FOOD",
-    type: "income",
-    icon: "cash",
-  },
-  {
-    id: "3",
-    title: "Netflix Subscription",
-    amount: -15.99,
-    date: new Date("2023-04-05"),
-    category: "ENTERTAINMENT",
-    type: "expense",
-    icon: "film",
-  },
-  {
-    id: "4",
-    title: "Uber Ride",
-    amount: -24.5,
-    date: new Date("2023-04-03"),
-    category: "TRANSPORT",
-    type: "expense",
-    icon: "car",
-  },
-];
+import { useTransactionsQueries } from "@/hooks/useTransactionsQueries";
+import { useFocusEffect } from "@react-navigation/native";
 
 const HomeScreen = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, theme } = useTheme();
   const navigation = useOwnNavigation();
   const { user, accountInfo } = useAuth();
+  const { transactions, isLoadingTransactions, refetch } =
+    useTransactionsQueries();
 
   const handleViewAll = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -64,9 +30,21 @@ const HomeScreen = () => {
     });
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [])
+  );
+
   const userFirstName = useMemo(() => {
     return user?.name.split(" ")[0] || "User";
   }, [user]);
+
+  const recentTransactions = useMemo(() => {
+    return transactions
+      ?.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 4);
+  }, [transactions]);
 
   return (
     <S.RootContainer>
@@ -151,9 +129,16 @@ const HomeScreen = () => {
           </S.SectionHeader>
 
           <S.TransactionsContainer>
-            {mockTransactions.map((transaction) => (
-              <TransactionItem key={transaction.id} transaction={transaction} />
-            ))}
+            {isLoadingTransactions ? (
+              <ActivityIndicator size="large" color={theme.colors.text} />
+            ) : (
+              recentTransactions?.map((transaction) => (
+                <TransactionItem
+                  key={transaction.id}
+                  transaction={transaction}
+                />
+              ))
+            )}
           </S.TransactionsContainer>
         </ScrollView>
       </S.Container>
