@@ -12,6 +12,7 @@ type AuthContextType = {
   isCheckingAuth: boolean;
   accountInfo?: IAccount | null;
   isCheckingAccountInfo?: boolean;
+  refreshAccountInfo?: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -37,6 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     isLoggingOut,
     accountInfo,
     isCheckingAccountInfo,
+    refreshAccountInfo,
   } = useAuthQueries();
 
   const handleLogin = useCallback(
@@ -56,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       logout: handleLogout,
       accountInfo,
       isCheckingAccountInfo,
+      refreshAccountInfo,
     }),
     [
       user,
@@ -66,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       handleLogout,
       accountInfo,
       isCheckingAccountInfo,
+      refreshAccountInfo,
     ]
   );
 

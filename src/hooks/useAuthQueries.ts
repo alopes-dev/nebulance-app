@@ -92,5 +92,6 @@ export const useAuthQueries = () => {
     isLoggingOut,
     accountInfo,
     isCheckingAccountInfo,
+    refreshAccountInfo: mutateCheckAccountInfo,
   };
 };
