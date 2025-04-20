@@ -17,8 +17,8 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
   expanded = false,
 }) => {
   const navigation = useNavigation<ITransactionDetailsNavigationProp>();
-  const { title, amount, date, category, icon } = transaction;
-  const isExpense = amount < 0;
+  const { title, amount, date, category, type, icon } = transaction;
+  const isExpense = type === "expense";
 
   // Format date
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
@@ -51,7 +51,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
 
         {expanded && (
           <S.DetailsContainer>
-            <S.Detail>{category}</S.Detail>
+            <S.Detail>{type}</S.Detail>
             <S.Detail>{formattedDate}</S.Detail>
           </S.DetailsContainer>
         )}

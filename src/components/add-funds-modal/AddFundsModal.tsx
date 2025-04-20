@@ -5,7 +5,7 @@ import { BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import CurrencyInput from "react-native-currency-input";
 import * as S from "./AddFundsModal.styles";
 import { useTheme } from "@/context/ThemeContext";
-
+import * as Haptics from "expo-haptics";
 interface AddFundsModalProps {
   goalId: string;
   goalTitle: string;
@@ -40,6 +40,7 @@ const AddFundsModal = ({
   }, []);
 
   const handleAddFunds = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (amount && amount > 0) {
       onAddFunds(amount);
       setAmount(null);

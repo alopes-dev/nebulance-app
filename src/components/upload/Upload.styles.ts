@@ -157,3 +157,84 @@ export const Detail = styled.Text`
   color: ${(props: ThemeProps) => props.theme.colors.textSecondary};
   margin-right: ${(props: ThemeProps) => props.theme.spacing.md}px;
 `;
+
+export const FileSourceCardContainer = styled.TouchableOpacity<{
+  selected: boolean;
+}>`
+  background-color: ${(props: ThemeProps & { selected: boolean }) =>
+    props.selected ? props.theme.colors.primary : props.theme.colors.card};
+  border-radius: 12px;
+  padding: 16px;
+  align-items: center;
+  justify-content: center;
+  margin: 8px;
+  min-width: 160px;
+  flex: 1;
+  opacity: ${(props: ThemeProps & { disabled: boolean }) =>
+    props.disabled ? 0.5 : 1};
+`;
+
+export const FileSourceIcon = styled.View<{ selected: boolean }>`
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  background-color: ${(props: ThemeProps & { selected: boolean }) =>
+    props.selected
+      ? props.theme.colors.primary
+      : props.theme.colors.background};
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+`;
+
+export const FileSourceTitle = styled.Text<{ selected: boolean }>`
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.sm}px;
+  font-weight: ${(props: ThemeProps) => props.theme.fontWeights.medium};
+  color: ${(props: ThemeProps & { selected: boolean }) =>
+    props.selected ? "#FFFFFF" : props.theme.colors.text};
+  text-align: center;
+`;
+
+export const FieldMappingContainer = styled.View`
+  margin-top: 16px;
+`;
+
+export const TransactionPreviewContainer = styled.View`
+  margin-top: 16px;
+`;
+
+export const ButtonContainer = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding: 0 16px;
+`;
+
+export const PrimaryButton = styled.TouchableOpacity`
+  background-color: ${(props: ThemeProps) => props.theme.colors.primary};
+  padding: 12px 24px;
+  border-radius: 8px;
+  flex: 1;
+  margin-left: 16px;
+`;
+
+export const SecondaryButton = styled.TouchableOpacity`
+  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  padding: 12px 24px;
+  border-radius: 8px;
+  flex: 1;
+`;
+
+export const PrimaryButtonText = styled.Text`
+  color: #ffffff;
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
+  font-weight: ${(props: ThemeProps) => props.theme.fontWeights.medium};
+  text-align: center;
+`;
+
+export const SecondaryButtonText = styled.Text`
+  color: ${(props: ThemeProps) => props.theme.colors.text};
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
+  font-weight: ${(props: ThemeProps) => props.theme.fontWeights.medium};
+  text-align: center;
+`;

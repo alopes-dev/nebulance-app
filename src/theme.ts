@@ -14,6 +14,7 @@ export const lightTheme = {
     expense: "#FF6B6B",
     income: "#4CAF50",
     border: "#EEEEEE",
+    disabled: "#E0E0E0",
   },
   spacing: {
     xs: 4,
@@ -63,6 +64,7 @@ export const darkTheme = {
     expense: "#FF6B6B",
     income: "#4CAF50",
     border: "#333333", // Dark border
+    disabled: "#1E1E1E",
   },
   spacing: {
     xs: 4,

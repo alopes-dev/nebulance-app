@@ -1,6 +1,5 @@
-import type React from "react";
+import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-
 import * as S from "./Upload.styles";
 
 interface FileSourceCardProps {
@@ -8,6 +7,7 @@ interface FileSourceCardProps {
   icon: string;
   selected: boolean;
   onPress: () => void;
+  disabled?: boolean;
 }
 
 const FileSourceCard: React.FC<FileSourceCardProps> = ({
@@ -15,23 +15,23 @@ const FileSourceCard: React.FC<FileSourceCardProps> = ({
   icon,
   selected,
   onPress,
+  disabled = false,
 }) => {
   return (
-    <S.CardContainer selected={selected} onPress={onPress}>
-      <S.IconContainer selected={selected}>
+    <S.FileSourceCardContainer
+      selected={selected}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <S.FileSourceIcon selected={selected}>
         <Ionicons
           name={icon as any}
           size={24}
           color={selected ? "#FFFFFF" : "#6E5DE7"}
         />
-      </S.IconContainer>
-      <S.CardTitle selected={selected}>{title}</S.CardTitle>
-      {selected && (
-        <S.CheckmarkContainer>
-          <Ionicons name="checkmark-circle" size={20} color="#6E5DE7" />
-        </S.CheckmarkContainer>
-      )}
-    </S.CardContainer>
+      </S.FileSourceIcon>
+      <S.FileSourceTitle selected={selected}>{title}</S.FileSourceTitle>
+    </S.FileSourceCardContainer>
   );
 };
 

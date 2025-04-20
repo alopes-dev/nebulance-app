@@ -9,7 +9,7 @@ import {
 import { Appearance } from "react-native";
 import { ThemeProvider as StyledThemeProvider } from "styled-components/native";
 import { lightTheme, darkTheme } from "../theme";
-
+import * as Haptics from "expo-haptics";
 type ThemeContextType = {
   isDarkMode: boolean;
   toggleTheme: () => void;
@@ -36,6 +36,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [colorScheme]);
 
   const toggleTheme = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsDarkMode((prev) => !prev);
   }, []);
 

@@ -4,7 +4,7 @@ import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { ITransactionListNavigationProp } from "@/navigation/Navigation.types";
 import * as S from "./TransactionDetailsScreen.styles";
-
+import { useTheme } from "@/context/ThemeContext";
 type TransactionDetailsParams = {
   TransactionDetails: {
     transaction: Transaction;
@@ -13,6 +13,7 @@ type TransactionDetailsParams = {
 
 const TransactionDetailsScreen = () => {
   const navigation = useNavigation<ITransactionListNavigationProp>();
+  const { isDarkMode, theme } = useTheme();
   const route =
     useRoute<RouteProp<TransactionDetailsParams, "TransactionDetails">>();
   const { transaction } = route.params;
@@ -22,11 +23,19 @@ const TransactionDetailsScreen = () => {
       <S.Container>
         <S.Header>
           <S.BackButton onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={isDarkMode ? theme.colors.text : theme.colors.border}
+            />
           </S.BackButton>
           <S.HeaderTitle>Transaction Details</S.HeaderTitle>
           <S.CloseButton onPress={() => navigation.goBack()}>
-            <Ionicons name="close" size={24} color="#333" />
+            <Ionicons
+              name="close"
+              size={24}
+              color={isDarkMode ? theme.colors.text : theme.colors.border}
+            />
           </S.CloseButton>
         </S.Header>
         <S.IconContainer isExpense={transaction.isExpense}>

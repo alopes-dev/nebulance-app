@@ -8,6 +8,8 @@ import TransactionItem from "@/components/transaction-item/TransactionItem";
 import type { Transaction } from "@/types";
 
 import * as S from "./TransactionsScreen.styles";
+import * as Haptics from "expo-haptics";
+import { useTheme } from "@/context/ThemeContext";
 
 const mockTransactions: Transaction[] = [
   {
@@ -15,7 +17,8 @@ const mockTransactions: Transaction[] = [
     title: "Grocery Shopping",
     amount: -85.75,
     date: new Date("2023-04-15"),
-    category: "Food",
+    category: "FOOD",
+    type: "expense",
     icon: "basket",
   },
   {
@@ -23,7 +26,8 @@ const mockTransactions: Transaction[] = [
     title: "Salary Deposit",
     amount: 2500.0,
     date: new Date("2023-04-10"),
-    category: "Income",
+    category: "FOOD",
+    type: "income",
     icon: "cash",
   },
   {
@@ -31,7 +35,8 @@ const mockTransactions: Transaction[] = [
     title: "Netflix Subscription",
     amount: -15.99,
     date: new Date("2023-04-05"),
-    category: "Entertainment",
+    category: "ENTERTAINMENT",
+    type: "expense",
     icon: "film",
   },
   {
@@ -39,7 +44,8 @@ const mockTransactions: Transaction[] = [
     title: "Uber Ride",
     amount: -24.5,
     date: new Date("2023-04-03"),
-    category: "Transportation",
+    category: "TRANSPORT",
+    type: "expense",
     icon: "car",
   },
   {
@@ -47,7 +53,8 @@ const mockTransactions: Transaction[] = [
     title: "Amazon Purchase",
     amount: -67.99,
     date: new Date("2023-04-02"),
-    category: "Shopping",
+    category: "SHOPPING",
+    type: "expense",
     icon: "cart",
   },
   {
@@ -55,7 +62,8 @@ const mockTransactions: Transaction[] = [
     title: "Freelance Payment",
     amount: 350.0,
     date: new Date("2023-04-01"),
-    category: "Income",
+    category: "FOOD",
+    type: "income",
     icon: "cash",
   },
   {
@@ -63,7 +71,8 @@ const mockTransactions: Transaction[] = [
     title: "Electric Bill",
     amount: -75.4,
     date: new Date("2023-03-28"),
-    category: "Utilities",
+    category: "UTILITIES",
+    type: "expense",
     icon: "flash",
   },
   {
@@ -71,7 +80,8 @@ const mockTransactions: Transaction[] = [
     title: "Gym Membership",
     amount: -35.0,
     date: new Date("2023-03-25"),
-    category: "Health",
+    category: "HEALTHCARE",
+    type: "expense",
     icon: "fitness",
   },
 ];
@@ -79,6 +89,7 @@ const mockTransactions: Transaction[] = [
 const TransactionsScreen = () => {
   const navigation = useNavigation();
   const [filter, setFilter] = useState("all");
+  const { isDarkMode, theme } = useTheme();
 
   const filteredTransactions =
     filter === "all"
@@ -88,15 +99,21 @@ const TransactionsScreen = () => {
       : mockTransactions.filter((t) => t.amount < 0);
 
   const handleAddTransaction = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     // In a real app, this would navigate to a transaction form
     console.log("Add transaction");
   };
 
   const handleImportTransactions = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     // Navigate to the transaction upload screen
     navigation.navigate("TransactionUpload" as never);
   };
 
+  const handleChangeFilter = (filter: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setFilter(filter);
+  };
   return (
     <S.RootContainer>
       <S.Container>
@@ -107,7 +124,11 @@ const TransactionsScreen = () => {
               <S.IoniconsStyle name="cloud-upload-outline" size={20} />
             </S.ActionButton>
             <S.ActionButton>
-              <Ionicons name="search-outline" size={20} color="#333" />
+              <Ionicons
+                name="search-outline"
+                size={20}
+                color={isDarkMode ? theme.colors.text : theme.colors.border}
+              />
             </S.ActionButton>
           </S.ActionButtonsContainer>
         </S.Header>
@@ -115,19 +136,19 @@ const TransactionsScreen = () => {
         <S.FilterContainer>
           <S.FilterButton
             active={filter === "all"}
-            onPress={() => setFilter("all")}
+            onPress={() => handleChangeFilter("all")}
           >
             <S.FilterText active={filter === "all"}>All</S.FilterText>
           </S.FilterButton>
           <S.FilterButton
             active={filter === "income"}
-            onPress={() => setFilter("income")}
+            onPress={() => handleChangeFilter("income")}
           >
             <S.FilterText active={filter === "income"}>Income</S.FilterText>
           </S.FilterButton>
           <S.FilterButton
             active={filter === "expense"}
-            onPress={() => setFilter("expense")}
+            onPress={() => handleChangeFilter("expense")}
           >
             <S.FilterText active={filter === "expense"}>Expense</S.FilterText>
           </S.FilterButton>

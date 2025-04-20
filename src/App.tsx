@@ -1,18 +1,34 @@
-import { StatusBar } from "react-native";
+import { ActivityIndicator, StatusBar, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/react-query";
 
 import AuthNavigator from "@/navigation/AuthNavigator";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { TransactionProvider } from "@/context/TransactionContext";
-import { useState } from "react";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import MainNavigator from "./navigation/MainNavigator";
 
 function AppContent() {
-  // In a real app, this would be determined by checking if the user is logged in
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const { isAuthenticated, isCheckingAuth } = useAuth();
   const { isDarkMode, theme } = useTheme();
+
+  if (isCheckingAuth) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme.colors.background,
+        }}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>
@@ -29,13 +45,17 @@ function AppContent() {
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <TransactionProvider>
-          <BottomSheetModalProvider>
-            <AppContent />
-          </BottomSheetModalProvider>
-        </TransactionProvider>
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ThemeProvider>
+            <TransactionProvider>
+              <BottomSheetModalProvider>
+                <AppContent />
+              </BottomSheetModalProvider>
+            </TransactionProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }

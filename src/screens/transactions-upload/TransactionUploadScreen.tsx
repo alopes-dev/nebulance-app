@@ -1,36 +1,16 @@
 import { useState } from "react";
-import { ScrollView, Alert } from "react-native";
+import { ScrollView, Alert, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { StackNavigationProp } from "@react-navigation/stack";
+import * as DocumentPicker from "expo-document-picker";
 import FileSourceCard from "@/components/upload/FileSourceCard";
 import TransactionPreviewItem from "@/components/upload/TransactionPreviewItem";
 import FieldMappingItem from "@/components/upload/FieldMappingItem";
 import type { Transaction } from "@/types";
-
+import { useTheme } from "@/context/ThemeContext";
+import { StatementProcessor } from "@/services/StatementProcessor";
 import * as S from "./TransactionUploadScreen.styles";
-
-// Mock data for transaction preview
-const mockTransactions: Partial<Transaction>[] = [
-  {
-    title: "Grocery Shopping",
-    amount: -85.75,
-    date: new Date("2023-04-15"),
-    category: "Food",
-  },
-  {
-    title: "Salary Deposit",
-    amount: 2500.0,
-    date: new Date("2023-04-10"),
-    category: "Income",
-  },
-  {
-    title: "Netflix Subscription",
-    amount: -15.99,
-    date: new Date("2023-04-05"),
-    category: "Entertainment",
-  },
-];
 
 // Field mapping options
 const fieldMappingOptions = [
@@ -53,17 +33,48 @@ type TransactionUploadScreenNavigationProp = StackNavigationProp<
 const TransactionUploadScreen = () => {
   const navigation = useNavigation<TransactionUploadScreenNavigationProp>();
   const [currentStep, setCurrentStep] = useState(1);
+  const { isDarkMode, theme } = useTheme();
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [fileUploaded, setFileUploaded] = useState(false);
   const [fieldMapping, setFieldMapping] = useState(fieldMappingOptions);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSourceSelect = (source: string) => {
+  const handleSourceSelect = async (source: string) => {
     setSelectedSource(source);
-    // In a real app, this would trigger a file picker or connection to the service
-    setTimeout(() => {
+    setIsProcessing(true);
+
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type:
+          source === "csv"
+            ? "text/csv"
+            : source === "ofx"
+            ? "application/x-ofx"
+            : "application/pdf",
+      });
+
+      if (result.canceled) {
+        Alert.alert("Error", "No file selected");
+        return;
+      }
+
+      const processedStatement = await StatementProcessor.processStatement(
+        result.assets[0].uri,
+        source as "csv" | "ofx" | "pdf"
+      );
+
+      setTransactions(processedStatement.transactions);
       setFileUploaded(true);
       setCurrentStep(2);
-    }, 500);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Failed to process the statement. Please try again."
+      );
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleFieldMappingChange = (fieldId: string, mappedTo: string) => {
@@ -89,11 +100,19 @@ const TransactionUploadScreen = () => {
       <S.Container>
         <S.Header>
           <S.BackButton onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={isDarkMode ? theme.colors.text : theme.colors.border}
+            />
           </S.BackButton>
           <S.HeaderTitle>Import Transactions</S.HeaderTitle>
           <S.CloseButton onPress={() => navigation.goBack()}>
-            <Ionicons name="close" size={24} color="#333" />
+            <Ionicons
+              name="close"
+              size={24}
+              color={isDarkMode ? theme.colors.text : theme.colors.border}
+            />
           </S.CloseButton>
         </S.Header>
 
@@ -161,28 +180,25 @@ const TransactionUploadScreen = () => {
 
               <S.SourcesGrid>
                 <FileSourceCard
-                  title="Bank Connection"
-                  icon="card"
-                  selected={selectedSource === "bank"}
-                  onPress={() => handleSourceSelect("bank")}
-                />
-                <FileSourceCard
                   title="CSV File"
                   icon="document-text"
                   selected={selectedSource === "csv"}
                   onPress={() => handleSourceSelect("csv")}
+                  disabled={isProcessing}
                 />
                 <FileSourceCard
-                  title="Excel File"
+                  title="OFX File"
                   icon="document"
-                  selected={selectedSource === "excel"}
-                  onPress={() => handleSourceSelect("excel")}
+                  selected={selectedSource === "ofx"}
+                  onPress={() => handleSourceSelect("ofx")}
+                  disabled={isProcessing}
                 />
                 <FileSourceCard
                   title="PDF Statement"
                   icon="document-attach"
                   selected={selectedSource === "pdf"}
                   onPress={() => handleSourceSelect("pdf")}
+                  disabled={isProcessing}
                 />
               </S.SourcesGrid>
             </S.StepContainer>
@@ -228,18 +244,18 @@ const TransactionUploadScreen = () => {
               <S.TransactionSummary>
                 <S.SummaryItem>
                   <S.SummaryLabel>Total Transactions</S.SummaryLabel>
-                  <S.SummaryValue>{mockTransactions.length}</S.SummaryValue>
+                  <S.SummaryValue>{transactions.length}</S.SummaryValue>
                 </S.SummaryItem>
                 <S.SummaryItem>
                   <S.SummaryLabel>Income Transactions</S.SummaryLabel>
                   <S.SummaryValue>
-                    {mockTransactions.filter((t) => (t.amount || 0) > 0).length}
+                    {transactions.filter((t) => t.amount > 0).length}
                   </S.SummaryValue>
                 </S.SummaryItem>
                 <S.SummaryItem>
                   <S.SummaryLabel>Expense Transactions</S.SummaryLabel>
                   <S.SummaryValue>
-                    {mockTransactions.filter((t) => (t.amount || 0) < 0).length}
+                    {transactions.filter((t) => t.amount < 0).length}
                   </S.SummaryValue>
                 </S.SummaryItem>
               </S.TransactionSummary>
@@ -247,10 +263,10 @@ const TransactionUploadScreen = () => {
               <S.PreviewTitle>Transaction Preview</S.PreviewTitle>
 
               <S.TransactionPreviewContainer>
-                {mockTransactions.map((transaction, index) => (
+                {transactions.map((transaction, index) => (
                   <TransactionPreviewItem
                     key={index}
-                    transaction={transaction as Transaction}
+                    transaction={transaction}
                   />
                 ))}
               </S.TransactionPreviewContainer>

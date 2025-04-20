@@ -3,12 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 
 import GoalCard from "@/components/goal-card/GoalCard";
 import type { Goal } from "@/types";
-
+import * as Haptics from "expo-haptics";
 import * as S from "./GoalsScreen.styles";
 import { useRef, useState } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import AddFundsModal from "@/components/add-funds-modal/AddFundsModal";
-
+import { useTheme } from "@/context/ThemeContext";
 const mockGoals: Goal[] = [
   {
     id: "1",
@@ -51,6 +51,7 @@ const mockGoals: Goal[] = [
 const GoalsScreen = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const { isDarkMode, theme } = useTheme();
 
   const handleAddFunds = (amount: number) => {
     if (selectedGoal) {
@@ -61,10 +62,16 @@ const GoalsScreen = () => {
   };
 
   const handleGoalPress = (goal: Goal) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setSelectedGoal(goal);
     if (bottomSheetModalRef.current) {
       bottomSheetModalRef.current.present();
     }
+  };
+
+  const handleAddNewGoal = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Add your logic here to add a new goal
   };
 
   return (
@@ -73,7 +80,11 @@ const GoalsScreen = () => {
         <S.Header>
           <S.HeaderTitle>Financial Goals</S.HeaderTitle>
           <S.SearchButton>
-            <Ionicons name="search-outline" size={24} color="#333" />
+            <Ionicons
+              name="search-outline"
+              size={24}
+              color={isDarkMode ? theme.colors.text : theme.colors.border}
+            />
           </S.SearchButton>
         </S.Header>
 
@@ -121,7 +132,7 @@ const GoalsScreen = () => {
           ))}
         </ScrollView>
 
-        <S.AddButton>
+        <S.AddButton onPress={() => handleAddNewGoal()}>
           <Ionicons name="add" size={24} color="#FFFFFF" />
         </S.AddButton>
 

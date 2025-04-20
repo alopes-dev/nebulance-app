@@ -3,9 +3,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 
 import * as S from "./ProfileScreen.styles";
+import { useAuth } from "@/context/AuthContext";
 
 const ProfileScreen = () => {
   const { isDarkMode, toggleTheme } = useTheme();
+  const { logout, user } = useAuth();
 
   return (
     <S.RootContainer>
@@ -25,8 +27,8 @@ const ProfileScreen = () => {
           <S.ProfileImage
             source={{ uri: "https://github.com/alopes-dev.png" }}
           />
-          <S.ProfileName>Alopes Dev</S.ProfileName>
-          <S.ProfileEmail>alopes.dev@gmail.com</S.ProfileEmail>
+          <S.ProfileName>{user?.name}</S.ProfileName>
+          <S.ProfileEmail>{user?.email}</S.ProfileEmail>
           <S.EditProfileButton>
             <S.EditProfileText>Edit Profile</S.EditProfileText>
           </S.EditProfileButton>
@@ -149,7 +151,7 @@ const ProfileScreen = () => {
               />
             </S.MenuItem>
             <S.Divider />
-            <S.MenuItem>
+            <S.MenuItem onPress={logout}>
               <S.MenuIconContainer bgColor="#F44336">
                 <Ionicons name="log-out-outline" size={20} color="#FFFFFF" />
               </S.MenuIconContainer>

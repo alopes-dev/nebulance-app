@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -13,6 +14,7 @@ import SocialButton from "@/components/auth/social-button/SocialButton";
 import { useTheme } from "@/context/ThemeContext";
 
 import * as S from "./LoginScreen.styles";
+import { useAuth } from "@/context/AuthContext";
 type AuthStackParamList = {
   Login: undefined;
   Signup: undefined;
@@ -31,11 +33,14 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const { theme } = useTheme();
+  const { login, isLoading } = useAuth();
+
+  const isDisabled = useMemo(() => {
+    return !email || !password || isLoading;
+  }, [email, password, isLoading]);
+
   const handleLogin = () => {
-    // Implement actual login logic here
-    console.log("Login with:", email, password);
-    // For demo purposes, we'll just navigate to the main app
-    // In a real app, you would authenticate with a backend
+    login(email, password);
   };
 
   return (
@@ -50,7 +55,7 @@ const LoginScreen = () => {
               <S.LogoBackground>
                 <Ionicons name="wallet" size={40} color="#FFFFFF" />
               </S.LogoBackground>
-              <S.AppName>Budget Finance</S.AppName>
+              <S.AppName>Nebulance</S.AppName>
             </S.LogoContainer>
 
             <S.WelcomeContainer>
@@ -120,8 +125,9 @@ const LoginScreen = () => {
                 </S.ForgotPasswordButton>
               </S.OptionsRow>
 
-              <S.LoginButton onPress={handleLogin}>
+              <S.LoginButton onPress={handleLogin} disabled={isDisabled}>
                 <S.LoginButtonText>Sign In</S.LoginButtonText>
+                {isLoading && <ActivityIndicator size="small" color="white" />}
               </S.LoginButton>
 
               <S.OrContainer>

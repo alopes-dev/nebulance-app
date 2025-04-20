@@ -7,3 +7,7 @@ declare module "styled-components" {
 
   export interface DefaultTheme extends ThemeType {}
 }
+
+declare module "ofx-js" {
+  export function parse(content: string): any;
+}

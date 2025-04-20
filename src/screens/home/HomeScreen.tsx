@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ScrollView, TouchableOpacity } from "react-native";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -8,20 +8,18 @@ import BudgetProgressCard from "@/components/budget-progress-card/BudgetProgress
 import type { Transaction } from "@/types";
 
 import * as S from "./HomeScreen.styles";
-import { useNavigation } from "@react-navigation/native";
-import {
-  ITransactionListNavigationProp,
-  ITransactionsStackNavigationProp,
-} from "@/navigation/Navigation.types";
-import { useOwnNavigation } from "@/hooks/use-own-navigation";
 
+import { useOwnNavigation } from "@/hooks/use-own-navigation";
+import * as Haptics from "expo-haptics";
+import { useAuth } from "@/context/AuthContext";
 const mockTransactions: Transaction[] = [
   {
     id: "1",
     title: "Grocery Shopping",
     amount: -85.75,
     date: new Date("2023-04-15"),
-    category: "Food",
+    category: "FOOD",
+    type: "expense",
     icon: "basket",
   },
   {
@@ -29,7 +27,8 @@ const mockTransactions: Transaction[] = [
     title: "Salary Deposit",
     amount: 2500.0,
     date: new Date("2023-04-10"),
-    category: "Income",
+    category: "FOOD",
+    type: "income",
     icon: "cash",
   },
   {
@@ -37,7 +36,8 @@ const mockTransactions: Transaction[] = [
     title: "Netflix Subscription",
     amount: -15.99,
     date: new Date("2023-04-05"),
-    category: "Entertainment",
+    category: "ENTERTAINMENT",
+    type: "expense",
     icon: "film",
   },
   {
@@ -45,7 +45,8 @@ const mockTransactions: Transaction[] = [
     title: "Uber Ride",
     amount: -24.5,
     date: new Date("2023-04-03"),
-    category: "Transportation",
+    category: "TRANSPORT",
+    type: "expense",
     icon: "car",
   },
 ];
@@ -54,18 +55,24 @@ const HomeScreen = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
   const { isDarkMode } = useTheme();
   const navigation = useOwnNavigation();
+  const { user, accountInfo } = useAuth();
 
   const handleViewAll = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     navigation.navigate("MainTabs", {
       screen: "Transactions",
     });
   };
 
+  const userFirstName = useMemo(() => {
+    return user?.name.split(" ")[0] || "User";
+  }, [user]);
+
   return (
     <S.RootContainer>
       <S.Container>
         <S.Header>
-          <S.HeaderTitle>Hello, Anthony</S.HeaderTitle>
+          <S.HeaderTitle>Hello, {userFirstName}</S.HeaderTitle>
           <TouchableOpacity>
             <S.NotificationIcon
               name="notifications-outline"
@@ -76,7 +83,11 @@ const HomeScreen = () => {
         </S.Header>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          <BalanceCard balance={4250.75} income={3200} expenses={1050.25} />
+          <BalanceCard
+            balance={accountInfo?.balance || 0}
+            income={2000}
+            expenses={3000}
+          />
 
           <S.SectionHeader>
             <S.SectionTitle>Budget Overview</S.SectionTitle>

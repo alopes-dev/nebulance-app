@@ -90,6 +90,11 @@ export const LoginButton = styled.TouchableOpacity`
   border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
   align-items: center;
   margin-bottom: ${(props: ThemeProps) => props.theme.spacing.lg}px;
+  flex-direction: row;
+  justify-content: center;
+  gap: ${(props: ThemeProps) => props.theme.spacing.md}px;
+  background-color: ${(props: ThemeProps & { disabled: boolean }) =>
+    props.disabled ? props.theme.colors.disabled : props.theme.colors.primary};
 `;
 
 export const LoginButtonText = styled.Text`
