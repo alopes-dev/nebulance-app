@@ -10,7 +10,7 @@ export const FinancialCalendarScreen = () => {
   const { accountInfo } = useAuth();
   const { markedDates } = useFinancialCalendar({
     balance: accountInfo?.balance || 0,
-    monthlyExpenses: accountInfo?.monthlyExpenses || 10,
+    monthlyExpenses: accountInfo?.monthlyExpenses || 1500,
   });
 
   const calendarTheme = {

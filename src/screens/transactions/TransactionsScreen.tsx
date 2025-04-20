@@ -13,6 +13,7 @@ import * as S from "./TransactionsScreen.styles";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/context/ThemeContext";
 import { useTransactionsQueries } from "@/hooks/useTransactionsQueries";
+import { EmptyState } from "./EmptyState";
 
 const TransactionsScreen = () => {
   const navigation = useNavigation();
@@ -115,6 +116,8 @@ const TransactionsScreen = () => {
         >
           {isLoadingTransactions ? (
             <ActivityIndicator size="large" color={theme.colors.text} />
+          ) : filteredTransactions?.length === 0 ? (
+            <EmptyState filter={filter} />
           ) : (
             filteredTransactions?.map((transaction) => (
               <TransactionItem
