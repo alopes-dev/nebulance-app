@@ -1,22 +1,26 @@
 import { Theme } from "./theme";
 
+export type ICategory =
+  | "FOOD"
+  | "TRANSPORT"
+  | "HOUSING"
+  | "UTILITIES"
+  | "ENTERTAINMENT"
+  | "HEALTHCARE"
+  | "SHOPPING"
+  | "OTHERS";
+
 export interface Transaction {
-  id: string;
-  title: string;
+  id?: string;
+  description: string;
   amount: number;
-  date: Date;
-  category:
-    | "FOOD"
-    | "TRANSPORT"
-    | "HOUSING"
-    | "UTILITIES"
-    | "ENTERTAINMENT"
-    | "HEALTHCARE"
-    | "SHOPPING"
-    | "OTHERS";
-  type: "income" | "expense" | "transfer";
-  icon: string;
+  date: string;
+  category: ICategory;
+  type: "INCOME" | "EXPENSE" | "TRANSFER";
+  icon?: string;
   isExpense?: boolean;
+  userId?: string;
+  accountId?: string;
 }
 
 export interface Goal {
