@@ -45,6 +45,8 @@ export const MoreButton = styled.TouchableOpacity`
   height: 32px;
   justify-content: center;
   align-items: center;
+  background-color: ${(props: ThemeProps) => props.theme.colors.background};
+  border-radius: 16px;
 `;
 
 export const ProgressContainer = styled.View`
@@ -105,10 +107,22 @@ export const RemainingText = styled.Text`
   color: ${(props: ThemeProps) => props.theme.colors.textSecondary};
 `;
 
+export const ActionFundsContainer = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: ${(props: ThemeProps) => props.theme.spacing.md}px;
+`;
+
 export const AddFundsButton = styled.TouchableOpacity`
   padding: ${(props: ThemeProps) => props.theme.spacing.xs}px
     ${(props: ThemeProps) => props.theme.spacing.md}px;
   background-color: ${(props: ThemeProps) => props.theme.colors.primary};
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
+`;
+
+export const WithdrawFundsButton = styled(AddFundsButton)`
+  background-color: ${(props: ThemeProps) => props.theme.colors.expense};
   border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
 `;
 

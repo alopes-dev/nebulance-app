@@ -1,25 +1,42 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Keyboard, KeyboardAvoidingView, Platform } from "react-native";
+import React, { useEffect, useState, useMemo, useRef } from "react";
+import {
+  ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetModal,
+  BottomSheetScrollView,
+  useBottomSheet,
+} from "@gorhom/bottom-sheet";
 import CurrencyInput from "react-native-currency-input";
 import * as S from "./AddFundsModal.styles";
 import { useTheme } from "@/context/ThemeContext";
 import * as Haptics from "expo-haptics";
+import SuccessScreen from "../success-screen/SuccessScreen";
+
 interface AddFundsModalProps {
   goalId: string;
   goalTitle: string;
-  onAddFunds: (amount: number) => void;
+  onAddOrWithdrawFunds: (amount: number, onSuccess: () => void) => void;
   bottomSheetModalRef: React.RefObject<BottomSheetModal>;
+  actionType: "add" | "withdraw";
+  isLoading: boolean;
 }
 
 const AddFundsModal = ({
   goalId,
   goalTitle,
-  onAddFunds,
+  onAddOrWithdrawFunds,
   bottomSheetModalRef,
+  actionType,
+  isLoading,
 }: AddFundsModalProps) => {
   const [amount, setAmount] = useState<number | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const bottomSheetSuccessModalRef = useRef<BottomSheetModal>(null);
   const { theme } = useTheme();
 
   const snapPoints = useMemo(() => ["50%"], []);
@@ -39,14 +56,69 @@ const AddFundsModal = ({
     };
   }, []);
 
-  const handleAddFunds = () => {
+  const handleAddOrWithdrawFunds = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (amount && amount > 0) {
-      onAddFunds(amount);
-      setAmount(null);
-      bottomSheetModalRef.current?.dismiss();
+      onAddOrWithdrawFunds(amount, () => {
+        setShowSuccess(true);
+        bottomSheetSuccessModalRef.current?.present();
+      });
     }
   };
+
+  const handleDismissSuccess = () => {
+    setShowSuccess(false);
+    setAmount(null);
+    bottomSheetSuccessModalRef.current?.dismiss();
+  };
+
+  const shouldShowAddFunds = actionType === "add";
+
+  if (showSuccess) {
+    return (
+      <BottomSheetModal
+        ref={bottomSheetSuccessModalRef}
+        index={0}
+        snapPoints={["100"]}
+        onDismiss={handleDismissSuccess}
+        backgroundStyle={{
+          backgroundColor: theme.colors.background,
+          borderRadius: 24,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 8,
+          },
+          shadowOpacity: 1,
+          shadowRadius: 24,
+          elevation: 64,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: theme.colors.text,
+          width: 40,
+          height: 4,
+          borderRadius: 4,
+          display: "none",
+        }}
+        enablePanDownToClose={false}
+        enableDynamicSizing={false}
+        enableOverDrag={false}
+      >
+        <SuccessScreen
+          title={
+            shouldShowAddFunds
+              ? "Funds Added Successfully!"
+              : "Funds Withdrawn Successfully!"
+          }
+          description={`${
+            shouldShowAddFunds ? "Added" : "Withdrawn"
+          } $${amount?.toLocaleString()} to ${goalTitle}`}
+          icon={shouldShowAddFunds ? "checkmark-circle" : "arrow-up-circle"}
+          onDismiss={handleDismissSuccess}
+        />
+      </BottomSheetModal>
+    );
+  }
 
   return (
     <BottomSheetModal
@@ -93,17 +165,23 @@ const AddFundsModal = ({
         >
           <S.Container>
             <S.Header>
-              <S.HeaderTitle>Add Funds</S.HeaderTitle>
+              <S.HeaderTitle>
+                {shouldShowAddFunds ? "Add Funds" : "Withdraw Funds"}
+              </S.HeaderTitle>
               <S.CloseButton
                 onPress={() => bottomSheetModalRef.current?.dismiss()}
               >
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color={theme.colors.text} />
               </S.CloseButton>
             </S.Header>
 
             <S.GoalInfo>
               <S.GoalTitle>{goalTitle}</S.GoalTitle>
-              <S.GoalSubtitle>Enter amount to add</S.GoalSubtitle>
+              <S.GoalSubtitle>
+                {shouldShowAddFunds
+                  ? "Enter amount to add"
+                  : "Enter amount to withdraw"}
+              </S.GoalSubtitle>
             </S.GoalInfo>
 
             <S.InputContainer>
@@ -132,10 +210,15 @@ const AddFundsModal = ({
             </S.InputContainer>
 
             <S.AddButton
-              onPress={handleAddFunds}
+              onPress={handleAddOrWithdrawFunds}
               disabled={!amount || amount <= 0}
             >
-              <S.AddButtonText>Add Funds</S.AddButtonText>
+              <S.AddButtonText>
+                {shouldShowAddFunds ? "Add Funds" : "Withdraw Funds"}
+              </S.AddButtonText>
+              {isLoading && (
+                <ActivityIndicator size="small" color={theme.colors.text} />
+              )}
             </S.AddButton>
           </S.Container>
         </BottomSheetScrollView>

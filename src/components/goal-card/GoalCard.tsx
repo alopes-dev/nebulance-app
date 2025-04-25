@@ -1,16 +1,18 @@
 import type React from "react";
-import { Ionicons } from "@expo/vector-icons";
-import type { Goal } from "../../types";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 
+import type { IGoal } from "@/types";
+import { useTheme } from "@/context/ThemeContext";
 import * as S from "./GoalCard.styles";
 
 interface GoalCardProps {
-  goal: Goal;
-  onPress: () => void;
+  goal: IGoal;
+  onPress: (action: "add" | "withdraw") => void;
 }
 
 const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
-  const { title, targetAmount, currentAmount, deadline, icon, color } = goal;
+  const { name, targetAmount, currentAmount, deadline, icon, color } = goal;
+  const { theme } = useTheme();
 
   const percentage = Math.round((currentAmount / targetAmount) * 100);
   const remaining = targetAmount - currentAmount;
@@ -25,18 +27,18 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
   return (
     <S.CardContainer>
       <S.HeaderContainer>
-        <S.IconContainer color={color}>
-          <Ionicons name={icon as any} size={20} color="#FFFFFF" />
+        <S.IconContainer color={color ?? theme.colors.secondary}>
+          {icon ? (
+            <Ionicons name={icon as any} size={20} color="#FFFFFF" />
+          ) : (
+            <FontAwesome5 name="piggy-bank" size={20} color="#FFFFFF" />
+          )}
         </S.IconContainer>
 
         <S.HeaderContent>
-          <S.Title>{title}</S.Title>
+          <S.Title>{name}</S.Title>
           <S.Deadline>Due {formattedDate}</S.Deadline>
         </S.HeaderContent>
-
-        <S.MoreButton>
-          <Ionicons name="ellipsis-vertical" size={20} color="#9E9E9E" />
-        </S.MoreButton>
       </S.HeaderContainer>
 
       <S.ProgressContainer>
@@ -48,14 +50,22 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
       </S.ProgressContainer>
 
       <S.ProgressBarContainer>
-        <S.ProgressBar percentage={percentage} color={color} />
+        <S.ProgressBar
+          percentage={percentage}
+          color={color ?? theme.colors.secondary}
+        />
       </S.ProgressBarContainer>
 
       <S.FooterContainer>
         <S.RemainingText>${remaining.toLocaleString()} left</S.RemainingText>
-        <S.AddFundsButton onPress={onPress}>
-          <S.AddFundsText>Add Funds</S.AddFundsText>
-        </S.AddFundsButton>
+        <S.ActionFundsContainer>
+          <S.WithdrawFundsButton onPress={() => onPress("withdraw")}>
+            <S.AddFundsText>Withdraw</S.AddFundsText>
+          </S.WithdrawFundsButton>
+          <S.AddFundsButton onPress={() => onPress("add")}>
+            <S.AddFundsText>Add Funds</S.AddFundsText>
+          </S.AddFundsButton>
+        </S.ActionFundsContainer>
       </S.FooterContainer>
     </S.CardContainer>
   );

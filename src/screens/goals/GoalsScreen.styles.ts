@@ -107,3 +107,23 @@ export const AddButton = styled.TouchableOpacity`
   shadow-opacity: 0.25;
   shadow-radius: 3.84px;
 `;
+
+export const EmptyGoalsContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  margin-top: ${(props: ThemeProps) => props.theme.spacing.lg}px;
+  gap: ${(props: ThemeProps) => props.theme.spacing.md}px;
+`;
+
+export const EmptyGoalsText = styled.Text`
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.lg}px;
+  font-weight: ${(props: ThemeProps) => props.theme.fontWeights.semiBold};
+  color: ${(props: ThemeProps) => props.theme.colors.text};
+`;
+
+export const LoadingContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
