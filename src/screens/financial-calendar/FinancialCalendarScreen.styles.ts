@@ -34,9 +34,15 @@ export const Title = styled.Text`
 
 export const Balance = styled.Text`
   font-size: 18px;
-  margin-bottom: 16px;
   color: ${(props: ThemeProps) => props.theme.colors.text};
   font-weight: bold;
+`;
+
+export const MonthlyExpenses = styled.Text`
+  font-size: 14px;
+  margin-bottom: 16px;
+  color: ${(props: ThemeProps) => props.theme.colors.text};
+  font-weight: 600;
 `;
 
 export const Legend = styled.View`

@@ -33,8 +33,11 @@ export const FinancialCalendarScreen = () => {
         <S.Header>
           <S.HeaderTitle>Financial Calendar</S.HeaderTitle>
           <S.Balance>
-            Current Balance: ${accountInfo?.balance?.toLocaleString()}
+            Balance: ${accountInfo?.balance?.toLocaleString()}
           </S.Balance>
+          <S.MonthlyExpenses>
+            Monthly Expenses: ${accountInfo?.monthlyExpenses?.toLocaleString()}
+          </S.MonthlyExpenses>
         </S.Header>
         <S.CardContainer>
           <Calendar
