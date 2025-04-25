@@ -46,6 +46,22 @@ const HomeScreen = () => {
       .slice(0, 4);
   }, [transactions]);
 
+  const totalIncome = useMemo(() => {
+    return transactions
+      ?.filter((transaction) => transaction.type === "INCOME")
+      .reduce((acc, transaction) => {
+        return acc + transaction.amount;
+      }, 0);
+  }, [transactions]);
+
+  const totalExpenses = useMemo(() => {
+    return transactions
+      ?.filter((transaction) => transaction.type === "EXPENSE")
+      .reduce((acc, transaction) => {
+        return acc + transaction.amount;
+      }, 0);
+  }, [transactions]);
+
   return (
     <S.RootContainer>
       <S.Container>
@@ -63,8 +79,8 @@ const HomeScreen = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
           <BalanceCard
             balance={accountInfo?.balance || 0}
-            income={2000}
-            expenses={3000}
+            income={totalIncome || 0}
+            expenses={totalExpenses || 0}
           />
 
           <S.SectionHeader>

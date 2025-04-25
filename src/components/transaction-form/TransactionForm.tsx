@@ -63,7 +63,7 @@ const TransactionForm = ({
           bottomSheetRef.current?.dismiss();
           reset();
         },
-        onError: (error) => {
+        onError: () => {
           alert("Error creating transaction");
         },
       }
@@ -74,7 +74,7 @@ const TransactionForm = ({
     isCreatingTransaction ||
     watch("title") === "" ||
     watch("amount") === 0 ||
-    watch("category") === "FOOD";
+    watch("category") === "";
 
   return (
     <BottomSheetModal

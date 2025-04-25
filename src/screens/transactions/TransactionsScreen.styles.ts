@@ -81,3 +81,26 @@ export const AddButton = styled.TouchableOpacity`
   shadow-opacity: 0.25;
   shadow-radius: 3.84px;
 `;
+
+export const EmptyStateContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: ${(props: ThemeProps) => props.theme.spacing.xl}px;
+  margin-top: ${(props: ThemeProps) => props.theme.spacing.xl}px;
+`;
+
+export const EmptyStateText = styled.Text`
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.lg}px;
+  font-weight: ${(props: ThemeProps) => props.theme.fontWeights.bold};
+  color: ${(props: ThemeProps) => props.theme.colors.text};
+  margin-top: ${(props: ThemeProps) => props.theme.spacing.md}px;
+  text-align: center;
+`;
+
+export const EmptyStateSubText = styled.Text`
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
+  color: ${(props: ThemeProps) => props.theme.colors.textSecondary};
+  margin-top: ${(props: ThemeProps) => props.theme.spacing.sm}px;
+  text-align: center;
+`;

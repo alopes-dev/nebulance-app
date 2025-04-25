@@ -10,7 +10,7 @@ export const FinancialCalendarScreen = () => {
   const { accountInfo } = useAuth();
   const { markedDates } = useFinancialCalendar({
     balance: accountInfo?.balance || 0,
-    monthlyExpenses: accountInfo?.monthlyExpenses || 10,
+    monthlyExpenses: accountInfo?.monthlyExpenses || 1500,
   });
 
   const calendarTheme = {
@@ -33,8 +33,11 @@ export const FinancialCalendarScreen = () => {
         <S.Header>
           <S.HeaderTitle>Financial Calendar</S.HeaderTitle>
           <S.Balance>
-            Current Balance: ${accountInfo?.balance?.toLocaleString()}
+            Balance: ${accountInfo?.balance?.toLocaleString()}
           </S.Balance>
+          <S.MonthlyExpenses>
+            Monthly Expenses: ${accountInfo?.monthlyExpenses?.toLocaleString()}
+          </S.MonthlyExpenses>
         </S.Header>
         <S.CardContainer>
           <Calendar

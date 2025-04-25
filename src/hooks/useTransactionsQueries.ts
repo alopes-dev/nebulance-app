@@ -2,8 +2,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { storage } from "@/utils/storage";
 import { createTransaction, getTransactions } from "@/services/transactions";
 import { Transaction } from "@/types";
+import { useAuth } from "@/context/AuthContext";
 
 export const useTransactionsQueries = () => {
+  const { refreshAccountInfo } = useAuth();
+
   const {
     data: transactions,
     isPending: isLoadingTransactions,
@@ -28,13 +31,12 @@ export const useTransactionsQueries = () => {
 
         if (!token) return null;
 
-        console.log(transaction);
-
         const response = await createTransaction(transaction);
         return response as Transaction;
       },
       onSuccess: () => {
         refetch();
+        refreshAccountInfo?.();
       },
     });
 
