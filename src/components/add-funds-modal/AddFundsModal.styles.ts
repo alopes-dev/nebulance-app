@@ -81,6 +81,10 @@ export const AddButton = styled.TouchableOpacity<{ disabled: boolean }>`
   shadow-offset: 0px 2px;
   shadow-opacity: 0.25;
   shadow-radius: 3.84px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: ${(props: ThemeProps) => props.theme.spacing.sm}px;
 `;
 
 export const AddButtonText = styled.Text`

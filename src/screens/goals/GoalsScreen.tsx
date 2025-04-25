@@ -1,18 +1,19 @@
-import { ScrollView } from "react-native";
+import { ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import GoalCard from "@/components/goal-card/GoalCard";
-import type { Goal } from "@/types";
+import type { IGoal } from "@/types";
 import * as Haptics from "expo-haptics";
 import * as S from "./GoalsScreen.styles";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState, useCallback } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import AddFundsModal from "@/components/add-funds-modal/AddFundsModal";
 import { useTheme } from "@/context/ThemeContext";
-const mockGoals: Goal[] = [
+import { useGoals } from "@/context/GoalsContext";
+const mockGoalsT: IGoal[] = [
   {
     id: "1",
-    title: "New Laptop",
+    name: "New Laptop",
     targetAmount: 1500,
     currentAmount: 750,
     deadline: new Date("2023-08-15"),
@@ -21,7 +22,7 @@ const mockGoals: Goal[] = [
   },
   {
     id: "2",
-    title: "Vacation Fund",
+    name: "Vacation Fund",
     targetAmount: 3000,
     currentAmount: 1200,
     deadline: new Date("2023-12-01"),
@@ -30,7 +31,7 @@ const mockGoals: Goal[] = [
   },
   {
     id: "3",
-    title: "Emergency Fund",
+    name: "Emergency Fund",
     targetAmount: 5000,
     currentAmount: 4200,
     deadline: new Date("2023-10-30"),
@@ -39,7 +40,7 @@ const mockGoals: Goal[] = [
   },
   {
     id: "4",
-    title: "New Phone",
+    name: "New Phone",
     targetAmount: 1000,
     currentAmount: 350,
     deadline: new Date("2023-09-15"),
@@ -49,19 +50,43 @@ const mockGoals: Goal[] = [
 ];
 
 const GoalsScreen = () => {
+  const {
+    goals,
+    isLoadingGoals,
+    addAmount,
+    withdrawAmount,
+    isAddingAmount,
+    isWithdrawingAmount,
+    refreshGoals,
+  } = useGoals();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshGoals();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshGoals]);
+
+  const [actionType, setActionType] = useState<"add" | "withdraw">("add");
+  const [selectedGoal, setSelectedGoal] = useState<IGoal | null>(null);
   const { isDarkMode, theme } = useTheme();
 
-  const handleAddFunds = (amount: number) => {
+  const handleAddOrWithdrawFunds = (amount: number, onSuccess: () => void) => {
     if (selectedGoal) {
-      // Here you would typically update the goal in your backend
-      console.log(`Adding ${amount} to goal ${selectedGoal.id}`);
-      // Update local state if needed
+      if (actionType === "withdraw") {
+        withdrawAmount(selectedGoal.id, amount, onSuccess);
+      } else {
+        addAmount(selectedGoal.id, amount, onSuccess);
+      }
     }
   };
 
-  const handleGoalPress = (goal: Goal) => {
+  const handleGoalPress = (goal: IGoal, action: "add" | "withdraw") => {
+    setActionType(action);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setSelectedGoal(goal);
     if (bottomSheetModalRef.current) {
@@ -73,6 +98,20 @@ const GoalsScreen = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     // Add your logic here to add a new goal
   };
+
+  const summarySavedValue = useMemo(
+    () =>
+      goals
+        ?.reduce((sum, goal) => sum + goal.currentAmount, 0)
+        .toLocaleString(),
+    [goals]
+  );
+
+  const summaryTargetValue = useMemo(
+    () =>
+      goals?.reduce((sum, goal) => sum + goal.targetAmount, 0).toLocaleString(),
+    [goals]
+  );
 
   return (
     <S.RootContainer>
@@ -92,27 +131,17 @@ const GoalsScreen = () => {
           <S.SummaryTitle>Goals Progress</S.SummaryTitle>
           <S.SummaryContent>
             <S.SummaryItem>
-              <S.SummaryValue>{mockGoals.length}</S.SummaryValue>
+              <S.SummaryValue>{goals?.length}</S.SummaryValue>
               <S.SummaryLabel>Active Goals</S.SummaryLabel>
             </S.SummaryItem>
             <S.SummaryDivider />
             <S.SummaryItem>
-              <S.SummaryValue>
-                $
-                {mockGoals
-                  .reduce((sum, goal) => sum + goal.currentAmount, 0)
-                  .toLocaleString()}
-              </S.SummaryValue>
+              <S.SummaryValue>${summarySavedValue}</S.SummaryValue>
               <S.SummaryLabel>Saved</S.SummaryLabel>
             </S.SummaryItem>
             <S.SummaryDivider />
             <S.SummaryItem>
-              <S.SummaryValue>
-                $
-                {mockGoals
-                  .reduce((sum, goal) => sum + goal.targetAmount, 0)
-                  .toLocaleString()}
-              </S.SummaryValue>
+              <S.SummaryValue>${summaryTargetValue}</S.SummaryValue>
               <S.SummaryLabel>Target</S.SummaryLabel>
             </S.SummaryItem>
           </S.SummaryContent>
@@ -122,12 +151,38 @@ const GoalsScreen = () => {
           <S.SectionTitle>Your Goals</S.SectionTitle>
         </S.SectionHeader>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {mockGoals.map((goal) => (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={theme.colors.text}
+            />
+          }
+        >
+          {!isLoadingGoals && goals?.length === 0 && (
+            <S.EmptyGoalsContainer>
+              <Ionicons
+                name="flag-outline"
+                size={24}
+                color={theme.colors.text}
+              />
+              <S.EmptyGoalsText>No goals found</S.EmptyGoalsText>
+            </S.EmptyGoalsContainer>
+          )}
+
+          {isLoadingGoals && (
+            <S.LoadingContainer>
+              <ActivityIndicator size="large" color={theme.colors.text} />
+            </S.LoadingContainer>
+          )}
+
+          {goals?.map((goal) => (
             <GoalCard
               key={goal.id}
               goal={goal}
-              onPress={() => handleGoalPress(goal)}
+              onPress={(action) => handleGoalPress(goal, action)}
             />
           ))}
         </ScrollView>
@@ -138,9 +193,11 @@ const GoalsScreen = () => {
 
         <AddFundsModal
           goalId={selectedGoal?.id ?? ""}
-          goalTitle={selectedGoal?.title ?? ""}
-          onAddFunds={handleAddFunds}
+          goalTitle={selectedGoal?.name ?? ""}
+          onAddOrWithdrawFunds={handleAddOrWithdrawFunds}
           bottomSheetModalRef={bottomSheetModalRef}
+          actionType={actionType}
+          isLoading={isAddingAmount || isWithdrawingAmount}
         />
       </S.Container>
     </S.RootContainer>

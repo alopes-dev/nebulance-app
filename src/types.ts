@@ -23,14 +23,14 @@ export interface Transaction {
   accountId?: string;
 }
 
-export interface Goal {
+export interface IGoal {
   id: string;
-  title: string;
+  name: string;
   targetAmount: number;
   currentAmount: number;
   deadline: Date;
-  icon: string;
-  color: string;
+  icon?: string;
+  color?: string;
 }
 
 export interface IUser {
