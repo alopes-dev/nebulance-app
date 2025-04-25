@@ -1,3 +1,4 @@
+import React from "react";
 import { ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -8,8 +9,10 @@ import * as S from "./GoalsScreen.styles";
 import { useMemo, useRef, useState, useCallback } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import AddFundsModal from "@/components/add-funds-modal/AddFundsModal";
+import AddGoalModal from "@/components/add-goal-modal/AddGoalModal";
 import { useTheme } from "@/context/ThemeContext";
 import { useGoals } from "@/context/GoalsContext";
+
 const mockGoalsT: IGoal[] = [
   {
     id: "1",
@@ -58,14 +61,17 @@ const GoalsScreen = () => {
     isAddingAmount,
     isWithdrawingAmount,
     refreshGoals,
+    createGoal,
+    isCreatingGoal,
   } = useGoals();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const addGoalModalRef = useRef<BottomSheetModal>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refreshGoals();
+      refreshGoals();
     } finally {
       setRefreshing(false);
     }
@@ -96,7 +102,16 @@ const GoalsScreen = () => {
 
   const handleAddNewGoal = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    // Add your logic here to add a new goal
+    if (addGoalModalRef.current) {
+      addGoalModalRef.current.present();
+    }
+  };
+
+  const handleCreateGoal = (
+    goal: Omit<IGoal, "id" | "currentAmount">,
+    onSuccess: () => void
+  ) => {
+    createGoal(goal, onSuccess);
   };
 
   const summarySavedValue = useMemo(
@@ -113,6 +128,17 @@ const GoalsScreen = () => {
     [goals]
   );
 
+  const renderSkeleton = () => (
+    <S.SkeletonContainer>
+      <S.SkeletonHeader />
+      <S.SkeletonSummaryCard />
+      <S.SkeletonSectionHeader />
+      {[1, 2, 3].map((i) => (
+        <S.SkeletonGoalCard key={i} />
+      ))}
+    </S.SkeletonContainer>
+  );
+
   return (
     <S.RootContainer>
       <S.Container>
@@ -127,67 +153,67 @@ const GoalsScreen = () => {
           </S.SearchButton>
         </S.Header>
 
-        <S.SummaryCard>
-          <S.SummaryTitle>Goals Progress</S.SummaryTitle>
-          <S.SummaryContent>
-            <S.SummaryItem>
-              <S.SummaryValue>{goals?.length}</S.SummaryValue>
-              <S.SummaryLabel>Active Goals</S.SummaryLabel>
-            </S.SummaryItem>
-            <S.SummaryDivider />
-            <S.SummaryItem>
-              <S.SummaryValue>${summarySavedValue}</S.SummaryValue>
-              <S.SummaryLabel>Saved</S.SummaryLabel>
-            </S.SummaryItem>
-            <S.SummaryDivider />
-            <S.SummaryItem>
-              <S.SummaryValue>${summaryTargetValue}</S.SummaryValue>
-              <S.SummaryLabel>Target</S.SummaryLabel>
-            </S.SummaryItem>
-          </S.SummaryContent>
-        </S.SummaryCard>
+        {isLoadingGoals ? (
+          renderSkeleton()
+        ) : (
+          <>
+            <S.SummaryCard>
+              <S.SummaryTitle>Goals Progress</S.SummaryTitle>
+              <S.SummaryContent>
+                <S.SummaryItem>
+                  <S.SummaryValue>{goals?.length}</S.SummaryValue>
+                  <S.SummaryLabel>Active Goals</S.SummaryLabel>
+                </S.SummaryItem>
+                <S.SummaryDivider />
+                <S.SummaryItem>
+                  <S.SummaryValue>${summarySavedValue}</S.SummaryValue>
+                  <S.SummaryLabel>Saved</S.SummaryLabel>
+                </S.SummaryItem>
+                <S.SummaryDivider />
+                <S.SummaryItem>
+                  <S.SummaryValue>${summaryTargetValue}</S.SummaryValue>
+                  <S.SummaryLabel>Target</S.SummaryLabel>
+                </S.SummaryItem>
+              </S.SummaryContent>
+            </S.SummaryCard>
 
-        <S.SectionHeader>
-          <S.SectionTitle>Your Goals</S.SectionTitle>
-        </S.SectionHeader>
+            <S.SectionHeader>
+              <S.SectionTitle>Your Goals</S.SectionTitle>
+            </S.SectionHeader>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.text}
-            />
-          }
-        >
-          {!isLoadingGoals && goals?.length === 0 && (
-            <S.EmptyGoalsContainer>
-              <Ionicons
-                name="flag-outline"
-                size={24}
-                color={theme.colors.text}
-              />
-              <S.EmptyGoalsText>No goals found</S.EmptyGoalsText>
-            </S.EmptyGoalsContainer>
-          )}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor={theme.colors.text}
+                />
+              }
+            >
+              {goals?.length === 0 && (
+                <S.EmptyGoalsContainer>
+                  <Ionicons
+                    name="flag-outline"
+                    size={24}
+                    color={theme.colors.text}
+                  />
+                  <S.EmptyGoalsText>No goals found</S.EmptyGoalsText>
+                </S.EmptyGoalsContainer>
+              )}
 
-          {isLoadingGoals && (
-            <S.LoadingContainer>
-              <ActivityIndicator size="large" color={theme.colors.text} />
-            </S.LoadingContainer>
-          )}
+              {goals?.map((goal) => (
+                <GoalCard
+                  key={goal.id}
+                  goal={goal}
+                  onPress={(action) => handleGoalPress(goal, action)}
+                />
+              ))}
+            </ScrollView>
+          </>
+        )}
 
-          {goals?.map((goal) => (
-            <GoalCard
-              key={goal.id}
-              goal={goal}
-              onPress={(action) => handleGoalPress(goal, action)}
-            />
-          ))}
-        </ScrollView>
-
-        <S.AddButton onPress={() => handleAddNewGoal()}>
+        <S.AddButton onPress={handleAddNewGoal}>
           <Ionicons name="add" size={24} color="#FFFFFF" />
         </S.AddButton>
 
@@ -198,6 +224,12 @@ const GoalsScreen = () => {
           bottomSheetModalRef={bottomSheetModalRef}
           actionType={actionType}
           isLoading={isAddingAmount || isWithdrawingAmount}
+        />
+
+        <AddGoalModal
+          bottomSheetModalRef={addGoalModalRef}
+          onCreateGoal={handleCreateGoal}
+          isLoading={isCreatingGoal}
         />
       </S.Container>
     </S.RootContainer>

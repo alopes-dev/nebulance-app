@@ -93,19 +93,14 @@ export const SectionTitle = styled.Text`
 
 export const AddButton = styled.TouchableOpacity`
   position: absolute;
-  bottom: ${(props: ThemeProps) => props.theme.spacing.xl}px;
-  right: ${(props: ThemeProps) => props.theme.spacing.xl}px;
-  width: 56px;
-  height: 56px;
-  border-radius: 28px;
+  bottom: ${(props: ThemeProps) => props.theme.spacing.md}px;
+  right: ${(props: ThemeProps) => props.theme.spacing.md}px;
+  width: 45px;
+  height: 45px;
+  border-radius: 24px;
   background-color: ${(props: ThemeProps) => props.theme.colors.primary};
   justify-content: center;
   align-items: center;
-  elevation: 5;
-  shadow-color: #000;
-  shadow-offset: 0px 2px;
-  shadow-opacity: 0.25;
-  shadow-radius: 3.84px;
 `;
 
 export const EmptyGoalsContainer = styled.View`
@@ -126,4 +121,34 @@ export const LoadingContainer = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
+`;
+
+export const SkeletonContainer = styled.View`
+  flex: 1;
+  gap: ${(props: ThemeProps) => props.theme.spacing.md}px;
+`;
+
+export const SkeletonHeader = styled.View`
+  height: 40px;
+  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
+`;
+
+export const SkeletonSummaryCard = styled.View`
+  height: 120px;
+  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.lg}px;
+`;
+
+export const SkeletonGoalCard = styled.View`
+  height: 100px;
+  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
+`;
+
+export const SkeletonSectionHeader = styled.View`
+  height: 24px;
+  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
+  width: 120px;
 `;

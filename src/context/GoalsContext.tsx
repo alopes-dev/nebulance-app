@@ -6,7 +6,10 @@ import { IGoal } from "@/types";
 type GoalsContextType = {
   goals: IGoal[] | null | undefined;
   isLoadingGoals: boolean;
-  createGoal: (goal: Omit<IGoal, "id" | "currentAmount">) => void;
+  createGoal: (
+    goal: Omit<IGoal, "id" | "currentAmount">,
+    onSuccess: () => void
+  ) => void;
   updateGoal: (id: string, goal: Omit<IGoal, "id" | "currentAmount">) => void;
   deleteGoal: (id: string) => void;
   addAmount: (id: string, amount: number, onSuccess: () => void) => void;
@@ -59,10 +62,14 @@ export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
   } = useGoalsQueries();
 
   const handleCreateGoal = useCallback(
-    async (goal: Omit<IGoal, "id" | "currentAmount">) => {
+    async (
+      goal: Omit<IGoal, "id" | "currentAmount">,
+      onSuccess: () => void
+    ) => {
       mutateCreateGoal(goal, {
         onSuccess: () => {
           refetch();
+          onSuccess();
         },
       });
     },

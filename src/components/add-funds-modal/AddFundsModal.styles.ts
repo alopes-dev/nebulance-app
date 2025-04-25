@@ -52,7 +52,7 @@ export const InputContainer = styled.View`
   margin-bottom: ${(props: ThemeProps) => props.theme.spacing.xxl}px;
   padding: ${(props: ThemeProps) => props.theme.spacing.md}px;
   background-color: ${(props: ThemeProps) => props.theme.colors.card};
-  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.lg}px;
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
 `;
 
 export const CurrencySymbol = styled.Text`
@@ -73,6 +73,7 @@ export const AmountInput = styled.TextInput`
 export const AddButton = styled.TouchableOpacity<{ disabled: boolean }>`
   background-color: ${(props: ThemeProps & { disabled: boolean }) =>
     props.disabled ? props.theme.colors.border : props.theme.colors.primary};
+  opacity: ${(props: { disabled: boolean }) => (props.disabled ? 0.5 : 1)};
   padding: ${(props: ThemeProps) => props.theme.spacing.lg}px;
   border-radius: ${(props: ThemeProps) => props.theme.borderRadius.lg}px;
   align-items: center;
