@@ -7,6 +7,7 @@ import {
   deleteGoal,
   addAmountToGoal,
   withdrawAmountFromGoal,
+  getGoal,
 } from "@/services/goals";
 import { IGoal } from "@/types";
 
@@ -20,12 +21,27 @@ export const useGoalsQueries = () => {
     queryKey: ["goals"],
     queryFn: async () => {
       const token = await storage.getAuthToken();
-      console.log(token);
+
       if (!token) return null;
       const response = await getGoals();
       return response as IGoal[];
     },
     retry: false,
+  });
+
+  // Query for fetching a goal by id
+  const {
+    data: goal,
+    isPending: isLoadingGoal,
+    mutate: mutateGetGoal,
+  } = useMutation({
+    mutationKey: ["goal"],
+    mutationFn: async (goalId: string) => {
+      const token = await storage.getAuthToken();
+      if (!token) return null;
+      const response = await getGoal(goalId);
+      return response as IGoal;
+    },
   });
 
   // Mutation for creating a new goal
@@ -90,6 +106,9 @@ export const useGoalsQueries = () => {
     goals: goals ?? [],
     isLoadingGoals,
     refetch,
+    goal,
+    isLoadingGoal,
+    mutateGetGoal,
 
     // Create
     mutateCreateGoal,

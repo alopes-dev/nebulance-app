@@ -52,3 +52,34 @@ export const TransactionDescription = styled.Text`
   margin-top: ${(props: ThemeProps) => props.theme.spacing.md}px;
   font-weight: bold;
 `;
+
+export const SkeletonContainer = styled.View`
+  flex: 1;
+  gap: ${(props: ThemeProps) => props.theme.spacing.md}px;
+`;
+
+export const SkeletonHeader = styled.View`
+  height: 40px;
+  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
+`;
+
+export const SkeletonSummaryCard = styled.View`
+  height: 120px;
+  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.lg}px;
+  animation: pulse 2s ease-in-out infinite;
+`;
+
+export const SkeletonGoalCard = styled.View`
+  height: 100px;
+  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
+`;
+
+export const SkeletonSectionHeader = styled.View`
+  height: 24px;
+  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
+  width: 120px;
+`;

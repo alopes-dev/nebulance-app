@@ -7,6 +7,11 @@ export const getGoals = async () => {
   return response.data;
 };
 
+export const getGoal = async (goalId: string) => {
+  const response = await baseApi.get(`/goals/${goalId}`);
+  return response.data;
+};
+
 export const createGoal = async (payload: IGoal) => {
   const response = await baseApi.post("/goals", {
     name: payload.name,

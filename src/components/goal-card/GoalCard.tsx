@@ -21,7 +21,8 @@ const GoalCard: React.FC<GoalCardProps> = ({
   onDelete,
   isDeletingGoal,
 }) => {
-  const { name, targetAmount, currentAmount, deadline, icon, color } = goal;
+  const { name, targetAmount, currentAmount, deadline, icon, color } =
+    goal ?? {};
   const { theme } = useTheme();
 
   const percentage = Math.round((currentAmount / targetAmount) * 100);
@@ -39,6 +40,8 @@ const GoalCard: React.FC<GoalCardProps> = ({
         activeOpacity: 1,
       }
     : {};
+
+  if (!goal) return null;
 
   return (
     <S.CardContainer

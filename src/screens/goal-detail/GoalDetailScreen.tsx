@@ -1,40 +1,91 @@
-import React, { useState } from "react";
-import { ScrollView, Alert, ActivityIndicator } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ScrollView, Alert, ActivityIndicator, Text } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { IGoal, Transaction } from "@/types";
+import { IGoal } from "@/types";
 import * as S from "./GoalDetailScreen.styles";
 import { useTheme } from "@/context/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, EvilIcons } from "@expo/vector-icons";
 import GoalCard from "@/components/goal-card/GoalCard";
 import { useTransactionsQueries } from "@/hooks/useTransactionsQueries";
 import TransactionItem from "@/components/transaction-item/TransactionItem";
 import { EmptyState } from "../transactions/EmptyState";
 import { useGoals } from "@/context/GoalsContext";
+import AddFundsModal from "@/components/add-funds-modal/AddFundsModal";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import * as Haptics from "expo-haptics";
+import AddGoalModal from "@/components/add-goal-modal/AddGoalModal";
+import { useAuth } from "@/context/AuthContext";
 interface RouteParams {
-  goal: IGoal;
+  goalId: string;
 }
 
 const GoalDetailScreen = () => {
   const { theme, isDarkMode } = useTheme();
+  const { accountInfo } = useAuth();
   const navigation = useNavigation();
+  const editGoalModalRef = useRef<BottomSheetModal>(null);
   const { transactions, isLoadingTransactions } = useTransactionsQueries();
   const route = useRoute();
-  const { goal } = route.params as RouteParams;
-  const { deleteGoal, isDeletingGoal } = useGoals();
+  const { goalId } = route.params as RouteParams;
+  const [actionType, setActionType] = useState<"add" | "withdraw" | "details">(
+    "add"
+  );
 
-  const [showAddFunds, setShowAddFunds] = useState(false);
-  const [showWithdrawFunds, setShowWithdrawFunds] = useState(false);
+  const {
+    deleteGoal,
+    isDeletingGoal,
+    addAmount,
+    withdrawAmount,
+    isAddingAmount,
+    isWithdrawingAmount,
+    isLoadingGoal,
+    goal,
+    handleGetGoal,
+    updateGoal,
+    isUpdatingGoal,
+  } = useGoals();
 
-  const progress = (goal.currentAmount / goal.targetAmount) * 100;
+  useEffect(() => {
+    handleGetGoal(goalId);
+  }, [goalId]);
 
-  const handleAddFunds = () => {
-    setShowAddFunds(true);
-    // TODO: Implement add funds logic
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const handleAddOrWithdrawFunds = useCallback(
+    (amount: number, onSuccess: () => void) => {
+      if (goal) {
+        if (actionType === "withdraw") {
+          withdrawAmount(goal.id, amount, () => {
+            onSuccess();
+            handleGetGoal(goalId);
+          });
+        } else {
+          addAmount(goal.id, amount, () => {
+            onSuccess();
+            handleGetGoal(goalId);
+          });
+        }
+      }
+    },
+    [goal, goalId, actionType, withdrawAmount, addAmount, handleGetGoal]
+  );
+
+  const handleEditGoal = (
+    goal: Omit<IGoal, "id" | "currentAmount">,
+    onSuccess: () => void
+  ) => {
+    updateGoal(goalId, goal, () => {
+      onSuccess();
+      handleGetGoal(goalId);
+    });
   };
 
-  const handleWithdrawFunds = () => {
-    setShowWithdrawFunds(true);
-    // TODO: Implement withdraw funds logic
+  const handleGoalPress = (action: "add" | "withdraw" | "details") => {
+    setActionType(action);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (bottomSheetModalRef.current) {
+      bottomSheetModalRef.current.present();
+    }
   };
 
   const handleDeleteGoal = () => {
@@ -47,7 +98,7 @@ const GoalDetailScreen = () => {
         text: "Delete",
         style: "destructive",
         onPress: () => {
-          deleteGoal(goal.id, () => {
+          deleteGoal(goalId, () => {
             navigation.goBack();
           });
         },
@@ -55,15 +106,36 @@ const GoalDetailScreen = () => {
     ]);
   };
 
+  const renderSkeleton = () => (
+    <S.SkeletonContainer>
+      <S.SkeletonSummaryCard />
+      <S.SkeletonSectionHeader />
+      {[1, 2, 3].map((i) => (
+        <S.SkeletonGoalCard key={i} />
+      ))}
+    </S.SkeletonContainer>
+  );
+
   return (
     <S.RootContainer>
       <S.Container>
         <S.Header>
-          <S.HeaderTitle>{goal.name}</S.HeaderTitle>
           <S.ActionButtonsContainer>
             <S.ActionButtons onPress={() => navigation.goBack()}>
               <Ionicons
-                name="close-outline"
+                name="arrow-back-outline"
+                size={20}
+                color={isDarkMode ? theme.colors.text : theme.colors.border}
+              />
+            </S.ActionButtons>
+          </S.ActionButtonsContainer>
+          <S.HeaderTitle>{goal?.name}</S.HeaderTitle>
+          <S.ActionButtonsContainer>
+            <S.ActionButtons
+              onPress={() => editGoalModalRef.current?.present()}
+            >
+              <EvilIcons
+                name="pencil"
                 size={20}
                 color={isDarkMode ? theme.colors.text : theme.colors.border}
               />
@@ -71,38 +143,62 @@ const GoalDetailScreen = () => {
           </S.ActionButtonsContainer>
         </S.Header>
 
-        <GoalCard
-          key={goal.id}
-          goal={goal}
-          preventPress
-          onPress={(action) => {}}
-          onDelete={handleDeleteGoal}
-          isDeletingGoal={isDeletingGoal}
-        />
+        {isLoadingGoal ? (
+          renderSkeleton()
+        ) : (
+          <>
+            {goal && (
+              <GoalCard
+                goal={goal}
+                preventPress
+                onPress={(action) => handleGoalPress(action)}
+                onDelete={handleDeleteGoal}
+                isDeletingGoal={isDeletingGoal}
+              />
+            )}
 
-        <S.TransactionDescription>
-          Historic of transactions
-        </S.TransactionDescription>
-        <ScrollView>
-          <S.Content>
-            <S.TransactionsList>
-              {isLoadingTransactions ? (
-                <ActivityIndicator size="large" color={theme.colors.text} />
-              ) : transactions?.length === 0 ? (
-                <EmptyState filter={"all"} />
-              ) : (
-                transactions?.map((transaction) => (
-                  <TransactionItem
-                    key={transaction.id}
-                    transaction={transaction}
-                    expanded
-                  />
-                ))
-              )}
-            </S.TransactionsList>
-          </S.Content>
-        </ScrollView>
+            <S.TransactionDescription>
+              Historic of transactions
+            </S.TransactionDescription>
+            <ScrollView>
+              <S.Content>
+                <S.TransactionsList>
+                  {isLoadingTransactions ? (
+                    <ActivityIndicator size="large" color={theme.colors.text} />
+                  ) : transactions?.length === 0 ? (
+                    <EmptyState filter={"all"} />
+                  ) : (
+                    transactions?.map((transaction) => (
+                      <TransactionItem
+                        key={transaction.id}
+                        transaction={transaction}
+                        expanded
+                      />
+                    ))
+                  )}
+                </S.TransactionsList>
+              </S.Content>
+            </ScrollView>
+          </>
+        )}
       </S.Container>
+
+      <AddFundsModal
+        goalTitle={goal?.name ?? ""}
+        onAddOrWithdrawFunds={handleAddOrWithdrawFunds}
+        bottomSheetModalRef={bottomSheetModalRef}
+        actionType={actionType}
+        isLoading={isAddingAmount || isWithdrawingAmount}
+        targetAmount={goal?.targetAmount ?? 0}
+        currentAmount={accountInfo?.balance ?? 0}
+      />
+
+      <AddGoalModal
+        bottomSheetModalRef={editGoalModalRef}
+        onSaveGoal={handleEditGoal}
+        isLoading={isUpdatingGoal}
+        goal={goal ?? undefined}
+      />
     </S.RootContainer>
   );
 };

@@ -41,3 +41,10 @@ export const CATEGORY_ITEMS = [
   { label: "Utilities", value: "UTILITIES" },
   { label: "Healthcare", value: "HEALTHCARE" },
 ];
+
+export const formatCurrency = (amount: number) => {
+  return amount.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
+};

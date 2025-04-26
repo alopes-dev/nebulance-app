@@ -9,6 +9,7 @@ import AuthNavigator from "@/navigation/AuthNavigator";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import MainNavigator from "./navigation/MainNavigator";
+import LottieView from "lottie-react-native";
 
 function AppContent() {
   const { isAuthenticated, isCheckingAuth } = useAuth();
@@ -19,12 +20,34 @@ function AppContent() {
       <View
         style={{
           flex: 1,
+          backgroundColor: theme.colors.background,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: theme.colors.background,
         }}
       >
-        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <LottieView
+          source={require("@/assets/react.json")}
+          autoPlay
+          loop
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+          }}
+        />
+        <LottieView
+          source={require("@/assets/loading.json")}
+          autoPlay
+          loop
+          style={{
+            width: 300,
+            height: 300,
+            position: "absolute",
+            bottom: 0,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        />
       </View>
     );
   }

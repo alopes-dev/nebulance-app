@@ -5,7 +5,7 @@ import { GoalsContextWrapper } from "@/screens/goals";
 import { GoalDetailContextWrapper } from "@/screens/goal-detail";
 export type GoalsStackParamList = {
   GoalsList: undefined;
-  GoalDetails: { goal: any };
+  GoalDetails: { goalId: string };
 };
 
 const Stack = createStackNavigator<GoalsStackParamList>();

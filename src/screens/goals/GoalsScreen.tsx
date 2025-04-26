@@ -1,5 +1,5 @@
 import React from "react";
-import { ActivityIndicator, ScrollView, RefreshControl } from "react-native";
+import { ScrollView, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
@@ -14,6 +14,7 @@ import AddGoalModal from "@/components/add-goal-modal/AddGoalModal";
 import { useTheme } from "@/context/ThemeContext";
 import { useGoals } from "@/context/GoalsContext";
 import { IGoalsListNavigationProp } from "@/navigation/Navigation.types";
+import { useAuth } from "@/context/AuthContext";
 
 const mockGoalsT: IGoal[] = [
   {
@@ -66,6 +67,7 @@ const GoalsScreen = () => {
     createGoal,
     isCreatingGoal,
   } = useGoals();
+  const { accountInfo } = useAuth();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const addGoalModalRef = useRef<BottomSheetModal>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -89,9 +91,15 @@ const GoalsScreen = () => {
   const handleAddOrWithdrawFunds = (amount: number, onSuccess: () => void) => {
     if (selectedGoal) {
       if (actionType === "withdraw") {
-        withdrawAmount(selectedGoal.id, amount, onSuccess);
+        withdrawAmount(selectedGoal.id, amount, () => {
+          refreshGoals();
+          onSuccess();
+        });
       } else {
-        addAmount(selectedGoal.id, amount, onSuccess);
+        addAmount(selectedGoal.id, amount, () => {
+          refreshGoals();
+          onSuccess();
+        });
       }
     }
   };
@@ -101,7 +109,7 @@ const GoalsScreen = () => {
     action: "add" | "withdraw" | "details"
   ) => {
     if (action === "details") {
-      navigation.navigate("GoalDetails", { goal });
+      navigation.navigate("GoalDetails", { goalId: goal.id });
       return;
     }
 
@@ -231,17 +239,18 @@ const GoalsScreen = () => {
         </S.AddButton>
 
         <AddFundsModal
-          goalId={selectedGoal?.id ?? ""}
           goalTitle={selectedGoal?.name ?? ""}
           onAddOrWithdrawFunds={handleAddOrWithdrawFunds}
           bottomSheetModalRef={bottomSheetModalRef}
           actionType={actionType}
           isLoading={isAddingAmount || isWithdrawingAmount}
+          targetAmount={selectedGoal?.targetAmount ?? 0}
+          currentAmount={accountInfo?.balance ?? 0}
         />
 
         <AddGoalModal
           bottomSheetModalRef={addGoalModalRef}
-          onCreateGoal={handleCreateGoal}
+          onSaveGoal={handleCreateGoal}
           isLoading={isCreatingGoal}
         />
       </S.Container>

@@ -11,17 +11,19 @@ import SuccessScreen from "../success-screen/SuccessScreen";
 
 interface AddGoalModalProps {
   bottomSheetModalRef: React.RefObject<BottomSheetModal>;
-  onCreateGoal: (
+  onSaveGoal: (
     goal: Omit<IGoal, "id" | "currentAmount">,
     onSuccess: () => void
   ) => void;
   isLoading: boolean;
+  goal?: IGoal;
 }
 
 const AddGoalModal: React.FC<AddGoalModalProps> = ({
   bottomSheetModalRef,
-  onCreateGoal,
+  onSaveGoal,
   isLoading,
+  goal,
 }) => {
   const { theme, isDarkMode } = useTheme();
   const [name, setName] = useState("");
@@ -52,11 +54,12 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
     setTargetAmount(null);
     setDeadline(new Date());
   };
+  const isEditing = !!goal;
 
-  const handleCreateGoal = () => {
+  const handleSaveGoal = () => {
     if (!name || !targetAmount || !deadline) return;
 
-    onCreateGoal(
+    onSaveGoal(
       {
         name,
         targetAmount,
@@ -75,6 +78,14 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
     bottomSheetModalRef.current?.dismiss();
     bottomSheetSuccessModalRef.current?.dismiss();
   };
+
+  useEffect(() => {
+    if (isEditing) {
+      setName(goal?.name ?? "");
+      setTargetAmount(goal?.targetAmount ?? null);
+      setDeadline(new Date(goal?.deadline ?? new Date()));
+    }
+  }, [goal]);
 
   const isFormValid = name && targetAmount && deadline;
 
@@ -110,8 +121,14 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
         enableOverDrag={false}
       >
         <SuccessScreen
-          title="Goal Created Successfully!"
-          description={`Created goal "${name}" with target amount of $${targetAmount?.toLocaleString()}`}
+          title={
+            isEditing
+              ? "Goal Updated Successfully!"
+              : "Goal Created Successfully!"
+          }
+          description={`${
+            isEditing ? "Updated" : "Created"
+          } goal "${name}" with target amount of $${targetAmount?.toLocaleString()}`}
           icon="checkmark-circle"
           onDismiss={handleDismissSuccess}
         />
@@ -155,7 +172,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
     >
       <S.Container>
         <S.Header>
-          <S.Title>Add New Goal</S.Title>
+          <S.Title>{isEditing ? "Edit Goal" : "Add New Goal"}</S.Title>
           <S.CloseButton onPress={() => bottomSheetModalRef.current?.dismiss()}>
             <Ionicons name="close" size={24} color={theme.colors.text} />
           </S.CloseButton>
@@ -208,11 +225,11 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
             themeVariant={isDarkMode ? "dark" : "light"}
           />
           <S.CreateButton
-            onPress={handleCreateGoal}
+            onPress={handleSaveGoal}
             disabled={!isFormValid || isLoading}
           >
             <S.CreateButtonText>
-              {isLoading ? "Creating..." : "Create Goal"}
+              {isLoading ? "Saving..." : "Save"}
             </S.CreateButtonText>
             {isLoading && (
               <ActivityIndicator size="small" color={theme.colors.text} />
