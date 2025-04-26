@@ -20,6 +20,7 @@ export const useGoalsQueries = () => {
     queryKey: ["goals"],
     queryFn: async () => {
       const token = await storage.getAuthToken();
+      console.log(token);
       if (!token) return null;
       const response = await getGoals();
       return response as IGoal[];

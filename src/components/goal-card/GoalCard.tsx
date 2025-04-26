@@ -4,13 +4,23 @@ import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import type { IGoal } from "@/types";
 import { useTheme } from "@/context/ThemeContext";
 import * as S from "./GoalCard.styles";
+import { ActivityIndicator } from "react-native";
 
 interface GoalCardProps {
   goal: IGoal;
-  onPress: (action: "add" | "withdraw") => void;
+  onPress: (action: "add" | "withdraw" | "details") => void;
+  preventPress?: boolean;
+  onDelete?: () => void;
+  isDeletingGoal?: boolean;
 }
 
-const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
+const GoalCard: React.FC<GoalCardProps> = ({
+  goal,
+  onPress,
+  preventPress,
+  onDelete,
+  isDeletingGoal,
+}) => {
   const { name, targetAmount, currentAmount, deadline, icon, color } = goal;
   const { theme } = useTheme();
 
@@ -24,8 +34,20 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
     year: "numeric",
   });
 
+  const opacityStyle = preventPress
+    ? {
+        activeOpacity: 1,
+      }
+    : {};
+
   return (
-    <S.CardContainer>
+    <S.CardContainer
+      disabled={preventPress}
+      onPress={() => {
+        if (!preventPress) onPress("details");
+      }}
+      {...opacityStyle}
+    >
       <S.HeaderContainer>
         <S.IconContainer color={color ?? theme.colors.secondary}>
           {icon ? (
@@ -39,6 +61,19 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
           <S.Title>{name}</S.Title>
           <S.Deadline>Due {formattedDate}</S.Deadline>
         </S.HeaderContent>
+
+        {onDelete && !isDeletingGoal && (
+          <S.MoreButton onPress={onDelete}>
+            <Ionicons
+              name="trash-outline"
+              size={20}
+              color={theme.colors.text}
+            />
+          </S.MoreButton>
+        )}
+        {isDeletingGoal && onDelete && (
+          <ActivityIndicator size="small" color={theme.colors.text} />
+        )}
       </S.HeaderContainer>
 
       <S.ProgressContainer>

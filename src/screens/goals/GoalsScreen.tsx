@@ -1,6 +1,7 @@
 import React from "react";
 import { ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 import GoalCard from "@/components/goal-card/GoalCard";
 import type { IGoal } from "@/types";
@@ -12,6 +13,7 @@ import AddFundsModal from "@/components/add-funds-modal/AddFundsModal";
 import AddGoalModal from "@/components/add-goal-modal/AddGoalModal";
 import { useTheme } from "@/context/ThemeContext";
 import { useGoals } from "@/context/GoalsContext";
+import { IGoalsListNavigationProp } from "@/navigation/Navigation.types";
 
 const mockGoalsT: IGoal[] = [
   {
@@ -67,6 +69,7 @@ const GoalsScreen = () => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const addGoalModalRef = useRef<BottomSheetModal>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation<IGoalsListNavigationProp>();
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -77,7 +80,9 @@ const GoalsScreen = () => {
     }
   }, [refreshGoals]);
 
-  const [actionType, setActionType] = useState<"add" | "withdraw">("add");
+  const [actionType, setActionType] = useState<"add" | "withdraw" | "details">(
+    "add"
+  );
   const [selectedGoal, setSelectedGoal] = useState<IGoal | null>(null);
   const { isDarkMode, theme } = useTheme();
 
@@ -91,7 +96,15 @@ const GoalsScreen = () => {
     }
   };
 
-  const handleGoalPress = (goal: IGoal, action: "add" | "withdraw") => {
+  const handleGoalPress = (
+    goal: IGoal,
+    action: "add" | "withdraw" | "details"
+  ) => {
+    if (action === "details") {
+      navigation.navigate("GoalDetails", { goal });
+      return;
+    }
+
     setActionType(action);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setSelectedGoal(goal);

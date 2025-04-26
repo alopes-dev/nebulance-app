@@ -1,7 +1,7 @@
 import styled from "styled-components/native";
 import { ThemeProps } from "@/types";
 
-export const CardContainer = styled.View`
+export const CardContainer = styled.TouchableOpacity`
   background-color: ${(props: ThemeProps) => props.theme.colors.card};
   border-radius: ${(props: ThemeProps) => props.theme.borderRadius.lg}px;
   padding: ${(props: ThemeProps) => props.theme.spacing.lg}px;
@@ -45,7 +45,7 @@ export const MoreButton = styled.TouchableOpacity`
   height: 32px;
   justify-content: center;
   align-items: center;
-  background-color: ${(props: ThemeProps) => props.theme.colors.background};
+  background-color: ${(props: ThemeProps) => props.theme.colors.expense};
   border-radius: 16px;
 `;
 

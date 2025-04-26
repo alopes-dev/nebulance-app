@@ -11,7 +11,7 @@ type GoalsContextType = {
     onSuccess: () => void
   ) => void;
   updateGoal: (id: string, goal: Omit<IGoal, "id" | "currentAmount">) => void;
-  deleteGoal: (id: string) => void;
+  deleteGoal: (id: string, onSuccess: () => void) => void;
   addAmount: (id: string, amount: number, onSuccess: () => void) => void;
   withdrawAmount: (id: string, amount: number, onSuccess: () => void) => void;
   refreshGoals: () => void;
@@ -91,10 +91,11 @@ export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const handleDeleteGoal = useCallback(
-    async (id: string) => {
+    async (id: string, onSuccess: () => void) => {
       mutateDeleteGoal(id, {
         onSuccess: () => {
           refetch();
+          onSuccess();
         },
       });
     },

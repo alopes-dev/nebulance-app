@@ -6,11 +6,7 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  BottomSheetModal,
-  BottomSheetScrollView,
-  useBottomSheet,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import CurrencyInput from "react-native-currency-input";
 import * as S from "./AddFundsModal.styles";
 import { useTheme } from "@/context/ThemeContext";
@@ -22,7 +18,7 @@ interface AddFundsModalProps {
   goalTitle: string;
   onAddOrWithdrawFunds: (amount: number, onSuccess: () => void) => void;
   bottomSheetModalRef: React.RefObject<BottomSheetModal>;
-  actionType: "add" | "withdraw";
+  actionType: "add" | "withdraw" | "details";
   isLoading: boolean;
 }
 

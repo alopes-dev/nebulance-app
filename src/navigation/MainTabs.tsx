@@ -3,10 +3,10 @@ import { Ionicons } from "@expo/vector-icons";
 
 import HomeScreen from "@/screens/home/HomeScreen";
 import { TransactionsStack } from "./TransactionsStack";
+import { GoalsStack } from "./GoalsStack";
 import ProfileScreen from "@/screens/profile/ProfileScreen";
 import { FinancialCalendarScreen } from "@/screens/financial-calendar/FinancialCalendarScreen";
 import { useTheme } from "@/context/ThemeContext";
-import { GoalsContextWrapper } from "@/screens/goals";
 
 const Tab = createBottomTabNavigator();
 
@@ -49,7 +49,7 @@ export const MainTabs = () => {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Transactions" component={TransactionsStack} />
       <Tab.Screen name="Calendar" component={FinancialCalendarScreen} />
-      <Tab.Screen name="Goals" component={GoalsContextWrapper} />
+      <Tab.Screen name="Goals" component={GoalsStack} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

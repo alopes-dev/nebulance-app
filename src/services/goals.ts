@@ -3,6 +3,7 @@ import baseApi from "./api";
 
 export const getGoals = async () => {
   const response = await baseApi.get("/goals");
+
   return response.data;
 };
 
