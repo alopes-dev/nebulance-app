@@ -15,6 +15,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useGoals } from "@/context/GoalsContext";
 import { IGoalsListNavigationProp } from "@/navigation/Navigation.types";
 import { useAuth } from "@/context/AuthContext";
+import { formatBalance } from "@/helpers";
 
 const mockGoalsT: IGoal[] = [
   {
@@ -104,7 +105,7 @@ const GoalsScreen = () => {
     }
   };
 
-  const handleGoalPress = (
+  const handleAddOrWithdraw = (
     goal: IGoal,
     action: "add" | "withdraw" | "details"
   ) => {
@@ -137,15 +138,17 @@ const GoalsScreen = () => {
 
   const summarySavedValue = useMemo(
     () =>
-      goals
-        ?.reduce((sum, goal) => sum + goal.currentAmount, 0)
-        .toLocaleString(),
+      formatBalance(
+        goals?.reduce((sum, goal) => sum + goal.currentAmount, 0) || 0
+      ),
     [goals]
   );
 
   const summaryTargetValue = useMemo(
     () =>
-      goals?.reduce((sum, goal) => sum + goal.targetAmount, 0).toLocaleString(),
+      formatBalance(
+        goals?.reduce((sum, goal) => sum + goal.targetAmount, 0) || 0
+      ),
     [goals]
   );
 
@@ -227,7 +230,9 @@ const GoalsScreen = () => {
                 <GoalCard
                   key={goal.id}
                   goal={goal}
-                  onPress={(action) => handleGoalPress(goal, action)}
+                  onAddOrWithdraw={(action) =>
+                    handleAddOrWithdraw(goal, action)
+                  }
                 />
               ))}
             </ScrollView>

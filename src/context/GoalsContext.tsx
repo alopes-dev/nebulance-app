@@ -9,6 +9,9 @@ import {
 } from "react";
 import { useGoalsQueries } from "@/hooks/useGoalsQueries";
 import { IGoal } from "@/types";
+import { Alert } from "react-native";
+
+import Toast from "react-native-toast-message";
 
 type TRefreshOn = "ALL" | "GOAL";
 
@@ -153,6 +156,14 @@ export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
         { id, amount },
         {
           onSuccess,
+          onError: (error) => {
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2: error.message,
+              position: "bottom",
+            });
+          },
         }
       );
     },

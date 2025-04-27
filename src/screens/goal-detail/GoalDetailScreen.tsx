@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ScrollView, Alert, ActivityIndicator, Text } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { IGoal } from "@/types";
@@ -24,7 +30,8 @@ const GoalDetailScreen = () => {
   const { accountInfo } = useAuth();
   const navigation = useNavigation();
   const editGoalModalRef = useRef<BottomSheetModal>(null);
-  const { transactions, isLoadingTransactions } = useTransactionsQueries();
+  const { transactions, isLoadingTransactions, refetch } =
+    useTransactionsQueries();
   const route = useRoute();
   const { goalId } = route.params as RouteParams;
   const [actionType, setActionType] = useState<"add" | "withdraw" | "details">(
@@ -49,6 +56,14 @@ const GoalDetailScreen = () => {
     handleGetGoal(goalId);
   }, [goalId]);
 
+  useEffect(() => {
+    refetch();
+  }, [goal]);
+
+  const goalTransactions = useMemo(() => {
+    return transactions?.filter((transaction) => transaction.goalId === goalId);
+  }, [transactions, goalId]);
+
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   const handleAddOrWithdrawFunds = useCallback(
@@ -58,11 +73,13 @@ const GoalDetailScreen = () => {
           withdrawAmount(goal.id, amount, () => {
             onSuccess();
             handleGetGoal(goalId);
+            refetch();
           });
         } else {
           addAmount(goal.id, amount, () => {
             onSuccess();
             handleGetGoal(goalId);
+            refetch();
           });
         }
       }
@@ -80,7 +97,7 @@ const GoalDetailScreen = () => {
     });
   };
 
-  const handleGoalPress = (action: "add" | "withdraw" | "details") => {
+  const handleAddOrWithdraw = (action: "add" | "withdraw" | "details") => {
     setActionType(action);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (bottomSheetModalRef.current) {
@@ -151,7 +168,7 @@ const GoalDetailScreen = () => {
               <GoalCard
                 goal={goal}
                 preventPress
-                onPress={(action) => handleGoalPress(action)}
+                onAddOrWithdraw={(action) => handleAddOrWithdraw(action)}
                 onDelete={handleDeleteGoal}
                 isDeletingGoal={isDeletingGoal}
               />
@@ -165,14 +182,15 @@ const GoalDetailScreen = () => {
                 <S.TransactionsList>
                   {isLoadingTransactions ? (
                     <ActivityIndicator size="large" color={theme.colors.text} />
-                  ) : transactions?.length === 0 ? (
+                  ) : goalTransactions?.length === 0 ? (
                     <EmptyState filter={"all"} />
                   ) : (
-                    transactions?.map((transaction) => (
+                    goalTransactions?.map((transaction) => (
                       <TransactionItem
                         key={transaction.id}
                         transaction={transaction}
                         expanded
+                        goalViewer
                       />
                     ))
                   )}

@@ -40,6 +40,8 @@ export const CATEGORY_ITEMS = [
   { label: "Shopping", value: "SHOPPING" },
   { label: "Utilities", value: "UTILITIES" },
   { label: "Healthcare", value: "HEALTHCARE" },
+  { label: "Savings", value: "SAVINGS" },
+  { label: "Other", value: "OTHER" },
 ];
 
 export const formatCurrency = (amount: number) => {
@@ -47,4 +49,13 @@ export const formatCurrency = (amount: number) => {
     style: "currency",
     currency: "USD",
   });
+};
+
+export const formatBalance = (value: number): string => {
+  if (value >= 1000000) {
+    return `${(value / 1000000).toFixed(1)}M`;
+  } else if (value >= 1000) {
+    return `${(value / 1000).toFixed(1)}k`;
+  }
+  return value.toLocaleString();
 };

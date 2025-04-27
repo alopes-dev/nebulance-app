@@ -2,6 +2,7 @@ import type React from "react";
 import { Ionicons } from "@expo/vector-icons";
 
 import * as S from "./BalanceCard.styles";
+import { useAuth } from "@/context/AuthContext";
 interface BalanceCardProps {
   balance: number;
   income: number;
@@ -13,11 +14,14 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   income,
   expenses,
 }) => {
+  const { currency } = useAuth();
   return (
     <S.CardContainer>
       <S.BalanceSection>
         <S.BalanceLabel>Total Balance</S.BalanceLabel>
-        <S.BalanceAmount>${balance.toLocaleString()}</S.BalanceAmount>
+        <S.BalanceAmount>
+          {balance.toLocaleString()} {currency}
+        </S.BalanceAmount>
       </S.BalanceSection>
 
       <S.StatsContainer>
@@ -27,7 +31,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
           </S.StatIconContainer>
           <S.StatContent>
             <S.StatLabel>Income</S.StatLabel>
-            <S.StatValue>${income.toLocaleString()}</S.StatValue>
+            <S.StatValue>{income.toLocaleString()}</S.StatValue>
           </S.StatContent>
         </S.StatItem>
 
@@ -39,7 +43,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
           </S.StatIconContainer>
           <S.StatContent>
             <S.StatLabel>Expenses</S.StatLabel>
-            <S.StatValue>${expenses.toLocaleString()}</S.StatValue>
+            <S.StatValue>{expenses.toLocaleString()}</S.StatValue>
           </S.StatContent>
         </S.StatItem>
       </S.StatsContainer>

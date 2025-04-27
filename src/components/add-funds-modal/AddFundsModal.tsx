@@ -20,6 +20,8 @@ import * as Haptics from "expo-haptics";
 import SuccessScreen from "../success-screen/SuccessScreen";
 import { intlFormat } from "date-fns";
 import { formatCurrency } from "@/helpers";
+import Toast from "react-native-toast-message";
+import { NebulaToast } from "../toast/toast";
 
 interface AddFundsModalProps {
   goalTitle: string;
@@ -257,6 +259,7 @@ const AddFundsModal = ({
               )}
             </S.AddButton>
           </S.Container>
+          <NebulaToast />
         </BottomSheetScrollView>
       </KeyboardAvoidingView>
     </BottomSheetModal>

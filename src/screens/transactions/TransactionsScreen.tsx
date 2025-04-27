@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -24,12 +24,13 @@ const TransactionsScreen = () => {
     useTransactionsQueries();
   const [refreshing, setRefreshing] = useState(false);
 
-  const filteredTransactions =
-    filter === "all"
-      ? transactions
-      : filter === "income"
-      ? transactions?.filter((t) => t.amount > 0)
-      : transactions?.filter((t) => t.amount < 0);
+  const filteredTransactions = useMemo(() => {
+    return (
+      filter === "all"
+        ? transactions
+        : transactions?.filter((t) => t.type?.toLowerCase() === filter)
+    )?.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [filter, transactions]);
 
   const handlePresentModal = useCallback(() => {
     bottomSheetRef.current?.present();

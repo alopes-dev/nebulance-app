@@ -5,10 +5,10 @@ import type { IGoal } from "@/types";
 import { useTheme } from "@/context/ThemeContext";
 import * as S from "./GoalCard.styles";
 import { ActivityIndicator } from "react-native";
-
+import { useAuth } from "@/context/AuthContext";
 interface GoalCardProps {
   goal: IGoal;
-  onPress: (action: "add" | "withdraw" | "details") => void;
+  onAddOrWithdraw: (action: "add" | "withdraw" | "details") => void;
   preventPress?: boolean;
   onDelete?: () => void;
   isDeletingGoal?: boolean;
@@ -16,7 +16,7 @@ interface GoalCardProps {
 
 const GoalCard: React.FC<GoalCardProps> = ({
   goal,
-  onPress,
+  onAddOrWithdraw,
   preventPress,
   onDelete,
   isDeletingGoal,
@@ -24,6 +24,7 @@ const GoalCard: React.FC<GoalCardProps> = ({
   const { name, targetAmount, currentAmount, deadline, icon, color } =
     goal ?? {};
   const { theme } = useTheme();
+  const { currency, accountInfo } = useAuth();
 
   const percentage = Math.round((currentAmount / targetAmount) * 100);
   const remaining = targetAmount - currentAmount;
@@ -43,11 +44,13 @@ const GoalCard: React.FC<GoalCardProps> = ({
 
   if (!goal) return null;
 
+  const currentAmountFormatted = currentAmount.toLocaleString();
+
   return (
     <S.CardContainer
       disabled={preventPress}
       onPress={() => {
-        if (!preventPress) onPress("details");
+        if (!preventPress) onAddOrWithdraw("details");
       }}
       {...opacityStyle}
     >
@@ -81,8 +84,10 @@ const GoalCard: React.FC<GoalCardProps> = ({
 
       <S.ProgressContainer>
         <S.ProgressInfo>
-          <S.ProgressText>${currentAmount.toLocaleString()}</S.ProgressText>
-          <S.TargetText>of ${targetAmount.toLocaleString()}</S.TargetText>
+          <S.ProgressText>{currentAmountFormatted}</S.ProgressText>
+          <S.TargetText>
+            of {targetAmount.toLocaleString()} {currency}
+          </S.TargetText>
         </S.ProgressInfo>
         <S.PercentageText>{percentage}%</S.PercentageText>
       </S.ProgressContainer>
@@ -97,10 +102,16 @@ const GoalCard: React.FC<GoalCardProps> = ({
       <S.FooterContainer>
         <S.RemainingText>${remaining.toLocaleString()} left</S.RemainingText>
         <S.ActionFundsContainer>
-          <S.WithdrawFundsButton onPress={() => onPress("withdraw")}>
+          <S.WithdrawFundsButton
+            disabled={currentAmount === 0}
+            onPress={() => onAddOrWithdraw("withdraw")}
+          >
             <S.AddFundsText>Withdraw</S.AddFundsText>
           </S.WithdrawFundsButton>
-          <S.AddFundsButton onPress={() => onPress("add")}>
+          <S.AddFundsButton
+            disabled={(accountInfo?.balance ?? 0) <= 0}
+            onPress={() => onAddOrWithdraw("add")}
+          >
             <S.AddFundsText>Add Funds</S.AddFundsText>
           </S.AddFundsButton>
         </S.ActionFundsContainer>

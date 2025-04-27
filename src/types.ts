@@ -21,6 +21,7 @@ export interface Transaction {
   isExpense?: boolean;
   userId?: string;
   accountId?: string;
+  goalId?: string;
 }
 
 export interface IGoal {
