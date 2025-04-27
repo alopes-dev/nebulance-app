@@ -1,14 +1,33 @@
 import type React from "react";
-import { createContext, useCallback, useContext, useMemo } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useGoalsQueries } from "@/hooks/useGoalsQueries";
 import { IGoal } from "@/types";
+import { Alert } from "react-native";
+
+import Toast from "react-native-toast-message";
+
+type TRefreshOn = "ALL" | "GOAL";
 
 type GoalsContextType = {
   goals: IGoal[] | null | undefined;
   isLoadingGoals: boolean;
-  createGoal: (goal: Omit<IGoal, "id" | "currentAmount">) => void;
-  updateGoal: (id: string, goal: Omit<IGoal, "id" | "currentAmount">) => void;
-  deleteGoal: (id: string) => void;
+  createGoal: (
+    goal: Omit<IGoal, "id" | "currentAmount">,
+    onSuccess: () => void
+  ) => void;
+  updateGoal: (
+    id: string,
+    goal: Omit<IGoal, "id" | "currentAmount">,
+    onSuccess: () => void
+  ) => void;
+  deleteGoal: (id: string, onSuccess: () => void) => void;
   addAmount: (id: string, amount: number, onSuccess: () => void) => void;
   withdrawAmount: (id: string, amount: number, onSuccess: () => void) => void;
   refreshGoals: () => void;
@@ -17,6 +36,9 @@ type GoalsContextType = {
   isDeletingGoal: boolean;
   isAddingAmount: boolean;
   isWithdrawingAmount: boolean;
+  goal: IGoal | null | undefined;
+  isLoadingGoal: boolean;
+  handleGetGoal: (id: string) => void;
 };
 
 const INITIAL_VALUES: GoalsContextType = {
@@ -28,11 +50,14 @@ const INITIAL_VALUES: GoalsContextType = {
   addAmount: () => {},
   withdrawAmount: () => {},
   refreshGoals: () => {},
+  goal: null,
+  isLoadingGoal: false,
   isCreatingGoal: false,
   isUpdatingGoal: false,
   isDeletingGoal: false,
   isAddingAmount: false,
   isWithdrawingAmount: false,
+  handleGetGoal: (id: string) => {},
 };
 
 const GoalsContext = createContext<GoalsContextType>(INITIAL_VALUES);
@@ -42,6 +67,8 @@ export const useGoals = () => useContext(GoalsContext);
 export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+
   const {
     goals,
     isLoadingGoals,
@@ -56,13 +83,24 @@ export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
     isAddingAmount,
     mutateWithdrawAmount,
     isWithdrawingAmount,
+    mutateGetGoal,
+    goal,
+    isLoadingGoal,
   } = useGoalsQueries();
 
+  const handleGetGoal = useCallback((id: string) => {
+    mutateGetGoal(id);
+  }, []);
+
   const handleCreateGoal = useCallback(
-    async (goal: Omit<IGoal, "id" | "currentAmount">) => {
+    async (
+      goal: Omit<IGoal, "id" | "currentAmount">,
+      onSuccess: () => void
+    ) => {
       mutateCreateGoal(goal, {
         onSuccess: () => {
           refetch();
+          onSuccess();
         },
       });
     },
@@ -70,13 +108,15 @@ export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const handleUpdateGoal = useCallback(
-    async (id: string, goal: Omit<IGoal, "id" | "currentAmount">) => {
+    async (
+      id: string,
+      goal: Omit<IGoal, "id" | "currentAmount">,
+      onSuccess: () => void
+    ) => {
       mutateUpdateGoal(
         { id, goal },
         {
-          onSuccess: () => {
-            refetch();
-          },
+          onSuccess,
         }
       );
     },
@@ -84,10 +124,11 @@ export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const handleDeleteGoal = useCallback(
-    async (id: string) => {
+    async (id: string, onSuccess: () => void) => {
       mutateDeleteGoal(id, {
         onSuccess: () => {
           refetch();
+          onSuccess();
         },
       });
     },
@@ -114,9 +155,14 @@ export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
       mutateWithdrawAmount(
         { id, amount },
         {
-          onSuccess: () => {
-            refetch();
-            onSuccess();
+          onSuccess,
+          onError: (error) => {
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2: error.message,
+              position: "bottom",
+            });
           },
         }
       );
@@ -128,6 +174,8 @@ export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
     () => ({
       goals,
       isLoadingGoals,
+      goal,
+      isLoadingGoal,
       createGoal: handleCreateGoal,
       updateGoal: handleUpdateGoal,
       deleteGoal: handleDeleteGoal,
@@ -139,6 +187,7 @@ export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
       isDeletingGoal,
       isAddingAmount,
       isWithdrawingAmount,
+      handleGetGoal,
     }),
     [
       goals,
@@ -154,6 +203,8 @@ export const GoalsProvider: React.FC<{ children: React.ReactNode }> = ({
       isDeletingGoal,
       isAddingAmount,
       isWithdrawingAmount,
+      handleGetGoal,
+      goal,
     ]
   );
 

@@ -4,15 +4,27 @@ import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import type { IGoal } from "@/types";
 import { useTheme } from "@/context/ThemeContext";
 import * as S from "./GoalCard.styles";
-
+import { ActivityIndicator } from "react-native";
+import { useAuth } from "@/context/AuthContext";
 interface GoalCardProps {
   goal: IGoal;
-  onPress: (action: "add" | "withdraw") => void;
+  onAddOrWithdraw: (action: "add" | "withdraw" | "details") => void;
+  preventPress?: boolean;
+  onDelete?: () => void;
+  isDeletingGoal?: boolean;
 }
 
-const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
-  const { name, targetAmount, currentAmount, deadline, icon, color } = goal;
+const GoalCard: React.FC<GoalCardProps> = ({
+  goal,
+  onAddOrWithdraw,
+  preventPress,
+  onDelete,
+  isDeletingGoal,
+}) => {
+  const { name, targetAmount, currentAmount, deadline, icon, color } =
+    goal ?? {};
   const { theme } = useTheme();
+  const { currency, accountInfo } = useAuth();
 
   const percentage = Math.round((currentAmount / targetAmount) * 100);
   const remaining = targetAmount - currentAmount;
@@ -24,8 +36,24 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
     year: "numeric",
   });
 
+  const opacityStyle = preventPress
+    ? {
+        activeOpacity: 1,
+      }
+    : {};
+
+  if (!goal) return null;
+
+  const currentAmountFormatted = currentAmount.toLocaleString();
+
   return (
-    <S.CardContainer>
+    <S.CardContainer
+      disabled={preventPress}
+      onPress={() => {
+        if (!preventPress) onAddOrWithdraw("details");
+      }}
+      {...opacityStyle}
+    >
       <S.HeaderContainer>
         <S.IconContainer color={color ?? theme.colors.secondary}>
           {icon ? (
@@ -39,12 +67,27 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
           <S.Title>{name}</S.Title>
           <S.Deadline>Due {formattedDate}</S.Deadline>
         </S.HeaderContent>
+
+        {onDelete && !isDeletingGoal && (
+          <S.MoreButton onPress={onDelete}>
+            <Ionicons
+              name="trash-outline"
+              size={20}
+              color={theme.colors.text}
+            />
+          </S.MoreButton>
+        )}
+        {isDeletingGoal && onDelete && (
+          <ActivityIndicator size="small" color={theme.colors.text} />
+        )}
       </S.HeaderContainer>
 
       <S.ProgressContainer>
         <S.ProgressInfo>
-          <S.ProgressText>${currentAmount.toLocaleString()}</S.ProgressText>
-          <S.TargetText>of ${targetAmount.toLocaleString()}</S.TargetText>
+          <S.ProgressText>{currentAmountFormatted}</S.ProgressText>
+          <S.TargetText>
+            of {targetAmount.toLocaleString()} {currency}
+          </S.TargetText>
         </S.ProgressInfo>
         <S.PercentageText>{percentage}%</S.PercentageText>
       </S.ProgressContainer>
@@ -59,10 +102,16 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, onPress }) => {
       <S.FooterContainer>
         <S.RemainingText>${remaining.toLocaleString()} left</S.RemainingText>
         <S.ActionFundsContainer>
-          <S.WithdrawFundsButton onPress={() => onPress("withdraw")}>
+          <S.WithdrawFundsButton
+            disabled={currentAmount === 0}
+            onPress={() => onAddOrWithdraw("withdraw")}
+          >
             <S.AddFundsText>Withdraw</S.AddFundsText>
           </S.WithdrawFundsButton>
-          <S.AddFundsButton onPress={() => onPress("add")}>
+          <S.AddFundsButton
+            disabled={(accountInfo?.balance ?? 0) <= 0}
+            onPress={() => onAddOrWithdraw("add")}
+          >
             <S.AddFundsText>Add Funds</S.AddFundsText>
           </S.AddFundsButton>
         </S.ActionFundsContainer>

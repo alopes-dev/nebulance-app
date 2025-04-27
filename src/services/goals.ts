@@ -3,6 +3,12 @@ import baseApi from "./api";
 
 export const getGoals = async () => {
   const response = await baseApi.get("/goals");
+
+  return response.data;
+};
+
+export const getGoal = async (goalId: string) => {
+  const response = await baseApi.get(`/goals/${goalId}`);
   return response.data;
 };
 

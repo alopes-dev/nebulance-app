@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -6,38 +12,44 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  BottomSheetModal,
-  BottomSheetScrollView,
-  useBottomSheet,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import CurrencyInput from "react-native-currency-input";
 import * as S from "./AddFundsModal.styles";
 import { useTheme } from "@/context/ThemeContext";
 import * as Haptics from "expo-haptics";
 import SuccessScreen from "../success-screen/SuccessScreen";
+import { intlFormat } from "date-fns";
+import { formatCurrency } from "@/helpers";
+import Toast from "react-native-toast-message";
+import { NebulaToast } from "../toast/toast";
 
 interface AddFundsModalProps {
-  goalId: string;
   goalTitle: string;
   onAddOrWithdrawFunds: (amount: number, onSuccess: () => void) => void;
   bottomSheetModalRef: React.RefObject<BottomSheetModal>;
-  actionType: "add" | "withdraw";
+  actionType: "add" | "withdraw" | "details";
   isLoading: boolean;
+  targetAmount: number;
+  currentAmount: number;
 }
 
 const AddFundsModal = ({
-  goalId,
   goalTitle,
   onAddOrWithdrawFunds,
   bottomSheetModalRef,
   actionType,
   isLoading,
+  targetAmount,
+  currentAmount,
 }: AddFundsModalProps) => {
   const [amount, setAmount] = useState<number | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const bottomSheetSuccessModalRef = useRef<BottomSheetModal>(null);
   const { theme } = useTheme();
+  const [error, setError] = useState<string | null>(null);
+  const shouldShowAddFunds = actionType === "add";
+  const isWithdraw = actionType === "withdraw";
+  const isAdd = actionType === "add";
 
   const snapPoints = useMemo(() => ["50%"], []);
 
@@ -56,9 +68,35 @@ const AddFundsModal = ({
     };
   }, []);
 
+  const validateWithdrawal = useCallback(() => {
+    const isExceedingTarget = amount && amount > targetAmount;
+    if (isExceedingTarget) {
+      const formattedTarget = formatCurrency(targetAmount);
+      return `You have ${formattedTarget} in your target amount. You cannot withdraw more than this.`;
+    }
+    return null;
+  }, [amount, targetAmount]);
+
+  const validateAddition = useCallback(() => {
+    const isExceedingBalance = amount && amount > currentAmount;
+    if (isExceedingBalance) {
+      const formattedBalance = formatCurrency(currentAmount);
+      return `You have ${formattedBalance} in your account. You cannot add more than this.`;
+    }
+    return null;
+  }, [amount, currentAmount]);
+
+  useEffect(() => {
+    if (isWithdraw) {
+      setError(validateWithdrawal());
+    } else if (isAdd) {
+      setError(validateAddition());
+    }
+  }, [isWithdraw, isAdd, validateAddition, validateWithdrawal]);
+
   const handleAddOrWithdrawFunds = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (amount && amount > 0) {
+    if (amount && amount > 0 && (!isWithdraw || amount <= targetAmount)) {
       onAddOrWithdrawFunds(amount, () => {
         setShowSuccess(true);
         bottomSheetSuccessModalRef.current?.present();
@@ -71,8 +109,6 @@ const AddFundsModal = ({
     setAmount(null);
     bottomSheetSuccessModalRef.current?.dismiss();
   };
-
-  const shouldShowAddFunds = actionType === "add";
 
   if (showSuccess) {
     return (
@@ -184,7 +220,7 @@ const AddFundsModal = ({
               </S.GoalSubtitle>
             </S.GoalInfo>
 
-            <S.InputContainer>
+            <S.InputContainer error={!!error}>
               <CurrencyInput
                 value={amount}
                 onChangeValue={setAmount}
@@ -209,9 +245,11 @@ const AddFundsModal = ({
               />
             </S.InputContainer>
 
+            {error && <S.ErrorText>{error}</S.ErrorText>}
+
             <S.AddButton
               onPress={handleAddOrWithdrawFunds}
-              disabled={!amount || amount <= 0}
+              disabled={isLoading || !!error}
             >
               <S.AddButtonText>
                 {shouldShowAddFunds ? "Add Funds" : "Withdraw Funds"}
@@ -221,6 +259,7 @@ const AddFundsModal = ({
               )}
             </S.AddButton>
           </S.Container>
+          <NebulaToast />
         </BottomSheetScrollView>
       </KeyboardAvoidingView>
     </BottomSheetModal>

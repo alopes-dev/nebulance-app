@@ -1,5 +1,11 @@
 import type React from "react";
-import { createContext, useCallback, useContext, useMemo } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { useAuthQueries } from "@/hooks/useAuthQueries";
 import { IAccount, IUser } from "@/types";
 
@@ -13,6 +19,8 @@ type AuthContextType = {
   accountInfo?: IAccount | null;
   isCheckingAccountInfo?: boolean;
   refreshAccountInfo?: () => Promise<void>;
+  currency: string;
+  handleSetCurrency: (currency: string) => void;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,6 +30,8 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: async () => {},
   isCheckingAuth: true,
+  currency: "USD",
+  handleSetCurrency: () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -29,6 +39,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const [currency, setCurrency] = useState<string>("USD");
   const {
     user,
     isCheckingAuth,
@@ -48,6 +59,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const handleLogout = useCallback(() => mutateLogout(), [mutateLogout]);
 
+  const handleSetCurrency = useCallback((currency: string) => {
+    setCurrency(currency);
+  }, []);
+
   const values = useMemo(
     () => ({
       isAuthenticated: !!user,
@@ -59,6 +74,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       accountInfo,
       isCheckingAccountInfo,
       refreshAccountInfo,
+      currency,
+      handleSetCurrency,
     }),
     [
       user,
@@ -70,6 +87,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       accountInfo,
       isCheckingAccountInfo,
       refreshAccountInfo,
+      currency,
+      handleSetCurrency,
     ]
   );
 

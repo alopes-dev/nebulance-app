@@ -2,6 +2,7 @@ import type React from "react";
 import { Ionicons } from "@expo/vector-icons";
 
 import * as S from "./BudgetProgressCard.styles";
+import { useAuth } from "@/context/AuthContext";
 
 interface BudgetProgressCardProps {
   title: string;
@@ -18,6 +19,7 @@ const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
   icon,
   color,
 }) => {
+  const { currency } = useAuth();
   const percentage = Math.min(Math.round((current / max) * 100), 100);
   const isOverBudget = current > max;
 
@@ -31,10 +33,10 @@ const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
       </S.HeaderContainer>
 
       <S.AmountContainer>
-        <S.CurrentAmount isOverBudget={isOverBudget}>
-          ${current}
-        </S.CurrentAmount>
-        <S.MaxAmount>/${max}</S.MaxAmount>
+        <S.CurrentAmount isOverBudget={isOverBudget}>{current}</S.CurrentAmount>
+        <S.MaxAmount>
+          / {max} {currency}
+        </S.MaxAmount>
       </S.AmountContainer>
 
       <S.ProgressBarContainer>

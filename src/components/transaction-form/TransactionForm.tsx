@@ -45,7 +45,6 @@ const TransactionForm = ({
   const snapPoints = ["64%"];
 
   const onSubmitForm = (data: any) => {
-    console.log(data);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     mutateCreateTransaction(
