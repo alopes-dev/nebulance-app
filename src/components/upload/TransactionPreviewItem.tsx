@@ -11,8 +11,8 @@ interface TransactionPreviewItemProps {
 const TransactionPreviewItem: React.FC<TransactionPreviewItemProps> = ({
   transaction,
 }) => {
-  const { title, amount, date, category } = transaction;
-  const isExpense = amount < 0;
+  const { description, amount, date, type, category } = transaction;
+  const isExpense = type === "EXPENSE";
 
   // Format date
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
@@ -22,13 +22,13 @@ const TransactionPreviewItem: React.FC<TransactionPreviewItemProps> = ({
 
   // Determine icon based on category
   let icon = "help-circle";
-  if (category === "Food") icon = "restaurant";
-  else if (category === "Income") icon = "cash";
-  else if (category === "Entertainment") icon = "film";
-  else if (category === "Transportation") icon = "car";
-  else if (category === "Shopping") icon = "cart";
-  else if (category === "Utilities") icon = "flash";
-  else if (category === "Health") icon = "fitness";
+  if (category === "FOOD") icon = "restaurant";
+  else if (category === "OTHERS") icon = "cash";
+  else if (category === "ENTERTAINMENT") icon = "film";
+  else if (category === "TRANSPORT") icon = "car";
+  else if (category === "SHOPPING") icon = "cart";
+  else if (category === "UTILITIES") icon = "flash";
+  else if (category === "HEALTHCARE") icon = "fitness";
 
   return (
     <S.ItemContainer>
@@ -38,9 +38,10 @@ const TransactionPreviewItem: React.FC<TransactionPreviewItemProps> = ({
 
       <S.ContentContainer>
         <S.TitleContainer>
-          <S.Title>{title}</S.Title>
+          <S.Title>{description}</S.Title>
           <S.Amount isExpense={isExpense}>
-            {isExpense ? "-" : "+"}${Math.abs(amount).toLocaleString()}
+            {isExpense && "-"}
+            {Math.abs(amount).toLocaleString()}
           </S.Amount>
         </S.TitleContainer>
 

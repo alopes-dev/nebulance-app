@@ -1,6 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { storage } from "@/utils/storage";
-import { createTransaction, getTransactions } from "@/services/transactions";
+import {
+  createTransaction,
+  getTransactions,
+  uploadTransactions,
+} from "@/services/transactions";
 import { Transaction } from "@/types";
 import { useAuth } from "@/context/AuthContext";
 
@@ -40,11 +44,31 @@ export const useTransactionsQueries = () => {
       },
     });
 
+  const {
+    mutate: mutateUploadTransactions,
+    isPending: isUploadingTransactions,
+  } = useMutation({
+    mutationFn: async (file: string) => {
+      const token = await storage.getAuthToken();
+
+      if (!token) return null;
+
+      const response = await uploadTransactions(file);
+      return response as Transaction[];
+    },
+    onSuccess: () => {
+      refetch();
+      refreshAccountInfo?.();
+    },
+  });
+
   return {
     transactions,
     isLoadingTransactions,
     refetch,
     mutateCreateTransaction,
     isCreatingTransaction,
+    mutateUploadTransactions,
+    isUploadingTransactions,
   };
 };

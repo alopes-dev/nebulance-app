@@ -14,3 +14,11 @@ export const createTransaction = async (
 
   return response.data;
 };
+
+export const uploadTransactions = async (file: string) => {
+  const response = await apiServer.post("/transactions/pdf", {
+    file,
+  });
+
+  return response.data?.transactions;
+};

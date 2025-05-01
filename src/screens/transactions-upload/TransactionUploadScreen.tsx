@@ -1,25 +1,19 @@
-import { useState } from "react";
-import { ScrollView, Alert, Platform } from "react-native";
+import { Fragment, useCallback, useRef, useState } from "react";
+import { Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import * as DocumentPicker from "expo-document-picker";
 import FileSourceCard from "@/components/upload/FileSourceCard";
 import TransactionPreviewItem from "@/components/upload/TransactionPreviewItem";
-import FieldMappingItem from "@/components/upload/FieldMappingItem";
 import type { Transaction } from "@/types";
 import { useTheme } from "@/context/ThemeContext";
 import { StatementProcessor } from "@/services/StatementProcessor";
 import * as S from "./TransactionUploadScreen.styles";
-
-// Field mapping options
-const fieldMappingOptions = [
-  { id: "title", label: "Description", mappedTo: "title" },
-  { id: "amount", label: "Amount", mappedTo: "amount" },
-  { id: "date", label: "Date", mappedTo: "date" },
-  { id: "category", label: "Category", mappedTo: "category" },
-  { id: "notes", label: "Notes", mappedTo: "notes" },
-];
+import { useTransactionsQueries } from "@/hooks/useTransactionsQueries";
+import LottieView from "lottie-react-native";
+import { NebulaToast } from "@/components/toast/Toast";
+import Toast from "react-native-toast-message";
 
 type UploadStackParamList = {
   Transactions: undefined;
@@ -34,11 +28,12 @@ const TransactionUploadScreen = () => {
   const navigation = useNavigation<TransactionUploadScreenNavigationProp>();
   const [currentStep, setCurrentStep] = useState(1);
   const { isDarkMode, theme } = useTheme();
+  const { mutateUploadTransactions, isUploadingTransactions } =
+    useTransactionsQueries();
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
-  const [fileUploaded, setFileUploaded] = useState(false);
-  const [fieldMapping, setFieldMapping] = useState(fieldMappingOptions);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const fileContentRef = useRef<string | null>(null);
 
   const handleSourceSelect = async (source: string) => {
     setSelectedSource(source);
@@ -59,13 +54,13 @@ const TransactionUploadScreen = () => {
         return;
       }
 
-      const processedStatement = await StatementProcessor.processStatement(
-        result.assets[0].uri,
-        source as "csv" | "ofx" | "pdf"
+      // Get base64 string of the file
+      const base64Content = await StatementProcessor.readFileAsBase64(
+        result.assets[0].uri
       );
 
-      setTransactions(processedStatement.transactions);
-      setFileUploaded(true);
+      fileContentRef.current = base64Content;
+
       setCurrentStep(2);
     } catch (error) {
       Alert.alert(
@@ -77,14 +72,6 @@ const TransactionUploadScreen = () => {
     }
   };
 
-  const handleFieldMappingChange = (fieldId: string, mappedTo: string) => {
-    setFieldMapping(
-      fieldMapping.map((field) =>
-        field.id === fieldId ? { ...field, mappedTo } : field
-      )
-    );
-  };
-
   const handleImportTransactions = () => {
     // In a real app, this would process the transactions and add them to the database
     Alert.alert("Success", "Transactions imported successfully!", [
@@ -94,6 +81,35 @@ const TransactionUploadScreen = () => {
       },
     ]);
   };
+
+  const handleContinue = useCallback(async () => {
+    if (currentStep === 2) {
+      if (!fileContentRef.current) {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "No file content found",
+          position: "bottom",
+        });
+        return;
+      }
+
+      mutateUploadTransactions(fileContentRef.current, {
+        onSuccess: (data) => {
+          setTransactions(data || []);
+          setCurrentStep(3);
+        },
+        onError: (error) => {
+          Toast.show({
+            type: "error",
+            text1: "Error",
+            text2: error.message,
+            position: "bottom",
+          });
+        },
+      });
+    }
+  }, [selectedSource, currentStep, fileContentRef, mutateUploadTransactions]);
 
   return (
     <S.RootContainer>
@@ -147,7 +163,7 @@ const TransactionUploadScreen = () => {
               )}
             </S.ProgressStepCircle>
             <S.ProgressStepLabel active={currentStep >= 2}>
-              Map Fields
+              Source selected
             </S.ProgressStepLabel>
           </S.ProgressStep>
 
@@ -170,118 +186,150 @@ const TransactionUploadScreen = () => {
           </S.ProgressStep>
         </S.ProgressContainer>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {currentStep === 1 && (
-            <S.StepContainer>
-              <S.StepTitle>Select File Source</S.StepTitle>
-              <S.StepDescription>
-                Choose where you want to import your transactions from
-              </S.StepDescription>
+        {currentStep === 1 && (
+          <S.StepContainer>
+            <S.StepTitle>Select File Source</S.StepTitle>
+            <S.StepDescription>
+              Choose where you want to import your transactions from
+            </S.StepDescription>
 
-              <S.SourcesGrid>
-                <FileSourceCard
-                  title="CSV File"
-                  icon="document-text"
-                  selected={selectedSource === "csv"}
-                  onPress={() => handleSourceSelect("csv")}
-                  disabled={isProcessing}
-                />
-                <FileSourceCard
-                  title="OFX File"
-                  icon="document"
-                  selected={selectedSource === "ofx"}
-                  onPress={() => handleSourceSelect("ofx")}
-                  disabled={isProcessing}
-                />
-                <FileSourceCard
-                  title="PDF Statement"
-                  icon="document-attach"
-                  selected={selectedSource === "pdf"}
-                  onPress={() => handleSourceSelect("pdf")}
-                  disabled={isProcessing}
-                />
-              </S.SourcesGrid>
-            </S.StepContainer>
-          )}
+            <S.SourcesGrid>
+              <FileSourceCard
+                title="CSV File"
+                icon="document-text"
+                selected={selectedSource === "csv"}
+                onPress={() => handleSourceSelect("csv")}
+                disabled={isProcessing}
+              />
+              <FileSourceCard
+                title="OFX File"
+                icon="document"
+                selected={selectedSource === "ofx"}
+                onPress={() => handleSourceSelect("ofx")}
+                disabled={isProcessing}
+              />
+              <FileSourceCard
+                title="PDF Statement"
+                icon="document-attach"
+                selected={selectedSource === "pdf"}
+                onPress={() => handleSourceSelect("pdf")}
+                disabled={isProcessing}
+              />
+            </S.SourcesGrid>
+          </S.StepContainer>
+        )}
 
-          {currentStep === 2 && (
-            <S.StepContainer>
-              <S.StepTitle>Map Fields</S.StepTitle>
-              <S.StepDescription>
-                Match the fields from your file to our transaction fields
-              </S.StepDescription>
+        {currentStep === 2 && (
+          <S.StepContainer
+            style={{
+              flex: 1,
+              justifyContent: "space-between",
+            }}
+          >
+            <S.FieldMappingContainer>
+              {!isUploadingTransactions && (
+                <Fragment>
+                  <S.StepTitle>Source selected</S.StepTitle>
+                  <S.StepDescription>
+                    Continue to upload your file to our transaction
+                  </S.StepDescription>
+                </Fragment>
+              )}
 
-              <S.FieldMappingContainer>
-                {fieldMapping.map((field) => (
-                  <FieldMappingItem
-                    key={field.id}
-                    field={field}
-                    onChange={(mappedTo) =>
-                      handleFieldMappingChange(field.id, mappedTo)
-                    }
+              {!isUploadingTransactions && (
+                <S.FileMappingContainer>
+                  <S.FileIconContainer>
+                    <Ionicons
+                      name="document-attach"
+                      size={50}
+                      color={theme.colors.text}
+                    />
+                  </S.FileIconContainer>
+                </S.FileMappingContainer>
+              )}
+
+              {isUploadingTransactions && (
+                <Fragment>
+                  <LottieView
+                    source={require("@/assets/uploading.json")}
+                    autoPlay
+                    loop
+                    style={{
+                      width: "100%",
+                      height: 300,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   />
-                ))}
-              </S.FieldMappingContainer>
 
-              <S.ButtonContainer>
-                <S.SecondaryButton onPress={() => setCurrentStep(1)}>
-                  <S.SecondaryButtonText>Back</S.SecondaryButtonText>
-                </S.SecondaryButton>
-                <S.PrimaryButton onPress={() => setCurrentStep(3)}>
-                  <S.PrimaryButtonText>Continue</S.PrimaryButtonText>
-                </S.PrimaryButton>
-              </S.ButtonContainer>
-            </S.StepContainer>
-          )}
+                  <S.UploadingContainer>
+                    <S.UploadingText>Uploading transactions...</S.UploadingText>
+                  </S.UploadingContainer>
+                </Fragment>
+              )}
+            </S.FieldMappingContainer>
 
-          {currentStep === 3 && (
-            <S.StepContainer>
-              <S.StepTitle>Review Transactions</S.StepTitle>
-              <S.StepDescription>
-                Review and confirm the transactions to import
-              </S.StepDescription>
+            <S.ButtonContainer>
+              <S.SecondaryButton onPress={() => setCurrentStep(1)}>
+                <S.SecondaryButtonText>Back</S.SecondaryButtonText>
+              </S.SecondaryButton>
+              <S.PrimaryButton
+                onPress={handleContinue}
+                disabled={isUploadingTransactions}
+              >
+                <S.PrimaryButtonText>
+                  {isUploadingTransactions ? "Uploading..." : "Continue"}
+                </S.PrimaryButtonText>
+              </S.PrimaryButton>
+            </S.ButtonContainer>
+          </S.StepContainer>
+        )}
 
-              <S.TransactionSummary>
-                <S.SummaryItem>
-                  <S.SummaryLabel>Total Transactions</S.SummaryLabel>
-                  <S.SummaryValue>{transactions.length}</S.SummaryValue>
-                </S.SummaryItem>
-                <S.SummaryItem>
-                  <S.SummaryLabel>Income Transactions</S.SummaryLabel>
-                  <S.SummaryValue>
-                    {transactions.filter((t) => t.amount > 0).length}
-                  </S.SummaryValue>
-                </S.SummaryItem>
-                <S.SummaryItem>
-                  <S.SummaryLabel>Expense Transactions</S.SummaryLabel>
-                  <S.SummaryValue>
-                    {transactions.filter((t) => t.amount < 0).length}
-                  </S.SummaryValue>
-                </S.SummaryItem>
-              </S.TransactionSummary>
+        {currentStep === 3 && (
+          <S.StepContainer>
+            <S.StepTitle>Review Transactions</S.StepTitle>
+            <S.StepDescription>
+              Transactions successfully uploaded
+            </S.StepDescription>
 
-              <S.PreviewTitle>Transaction Preview</S.PreviewTitle>
+            <S.TransactionSummary>
+              <S.SummaryItem>
+                <S.SummaryLabel>Total Transactions</S.SummaryLabel>
+                <S.SummaryValue>{transactions.length}</S.SummaryValue>
+              </S.SummaryItem>
+              <S.SummaryItem>
+                <S.SummaryLabel>Income Transactions</S.SummaryLabel>
+                <S.SummaryValue>
+                  {transactions?.filter((t) => t.type === "INCOME").length}
+                </S.SummaryValue>
+              </S.SummaryItem>
+              <S.SummaryItem>
+                <S.SummaryLabel>Expense Transactions</S.SummaryLabel>
+                <S.SummaryValue>
+                  {transactions?.filter((t) => t.type === "EXPENSE").length}
+                </S.SummaryValue>
+              </S.SummaryItem>
+            </S.TransactionSummary>
+            <S.ButtonContainer style={{ marginBottom: 20, marginTop: 0 }}>
+              <S.PrimaryButton onPress={() => navigation.goBack()}>
+                <S.PrimaryButtonText>Done</S.PrimaryButtonText>
+              </S.PrimaryButton>
+            </S.ButtonContainer>
 
-              <S.TransactionPreviewContainer>
-                {transactions.map((transaction, index) => (
-                  <TransactionPreviewItem
-                    key={index}
-                    transaction={transaction}
-                  />
-                ))}
-              </S.TransactionPreviewContainer>
+            <S.PreviewTitle>Transaction Preview</S.PreviewTitle>
 
-              <S.ButtonContainer>
-                <S.SecondaryButton onPress={() => setCurrentStep(2)}>
-                  <S.SecondaryButtonText>Back</S.SecondaryButtonText>
-                </S.SecondaryButton>
-                <S.PrimaryButton onPress={handleImportTransactions}>
-                  <S.PrimaryButtonText>Import Transactions</S.PrimaryButtonText>
-                </S.PrimaryButton>
-              </S.ButtonContainer>
-            </S.StepContainer>
-          )}
-        </ScrollView>
+            <S.TransactionPreviewContainer
+              contentContainerStyle={{
+                paddingBottom: 350,
+              }}
+            >
+              {transactions.map((transaction, index) => (
+                <TransactionPreviewItem key={index} transaction={transaction} />
+              ))}
+            </S.TransactionPreviewContainer>
+          </S.StepContainer>
+        )}
+        <NebulaToast />
       </S.Container>
     </S.RootContainer>
   );
