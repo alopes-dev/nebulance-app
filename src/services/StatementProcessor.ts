@@ -255,6 +255,18 @@ export class StatementProcessor {
   //   };
   // }
 
+  static async readFileAsBase64(uri: string): Promise<string> {
+    try {
+      const base64Content = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return base64Content;
+    } catch (error) {
+      console.error("Error reading file as base64:", error);
+      throw new Error("Could not read file as base64");
+    }
+  }
+
   public static async processStatement(
     uri: string,
     fileType: "csv" | "ofx" | "pdf"

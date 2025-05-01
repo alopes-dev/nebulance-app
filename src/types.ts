@@ -22,6 +22,7 @@ export interface Transaction {
   userId?: string;
   accountId?: string;
   goalId?: string;
+  status?: "PENDING" | "CONFIRMED";
 }
 
 export interface IGoal {

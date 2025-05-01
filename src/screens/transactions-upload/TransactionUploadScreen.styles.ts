@@ -131,6 +131,13 @@ export const FieldMappingContainer = styled.View`
   margin-bottom: ${(props: ThemeProps) => props.theme.spacing.lg}px;
 `;
 
+export const FileMappingContainer = styled.View`
+  margin-bottom: ${(props: ThemeProps) => props.theme.spacing.lg}px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+`;
+
 export const TransactionSummary = styled.View`
   background-color: ${(props: ThemeProps) => props.theme.colors.card};
   border-radius: ${(props: ThemeProps) => props.theme.borderRadius.lg}px;
@@ -162,7 +169,7 @@ export const PreviewTitle = styled.Text`
   margin-bottom: ${(props: ThemeProps) => props.theme.spacing.md}px;
 `;
 
-export const TransactionPreviewContainer = styled.View`
+export const TransactionPreviewContainer = styled.ScrollView`
   margin-bottom: ${(props: ThemeProps) => props.theme.spacing.lg}px;
 `;
 
@@ -172,14 +179,19 @@ export const ButtonContainer = styled.View`
   margin-top: ${(props: ThemeProps) => props.theme.spacing.md}px;
 `;
 
-export const PrimaryButton = styled.TouchableOpacity`
-  background-color: ${(props: ThemeProps) => props.theme.colors.primary};
+export const PrimaryButton = styled.TouchableOpacity<{
+  disabled: boolean;
+}>`
+  background-color: ${(props: ThemeProps & { disabled: boolean }) =>
+    props.disabled ? props.theme.colors.card : props.theme.colors.primary};
   padding: ${(props: ThemeProps) => props.theme.spacing.md}px
     ${(props: ThemeProps) => props.theme.spacing.lg}px;
   border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
   flex: 1;
   align-items: center;
   margin-left: ${(props: ThemeProps) => props.theme.spacing.sm}px;
+  opacity: ${(props: ThemeProps & { disabled: boolean }) =>
+    props.disabled ? 0.5 : 1};
 `;
 
 export const PrimaryButtonText = styled.Text`
@@ -202,4 +214,26 @@ export const SecondaryButtonText = styled.Text`
   color: ${(props: ThemeProps) => props.theme.colors.text};
   font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
   font-weight: ${(props: ThemeProps) => props.theme.fontWeights.semiBold};
+`;
+
+export const UploadingContainer = styled.View`
+  align-items: center;
+  justify-content: center;
+`;
+
+export const UploadingText = styled.Text`
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
+  font-weight: ${(props: ThemeProps) => props.theme.fontWeights.semiBold};
+  color: ${(props: ThemeProps) => props.theme.colors.text};
+`;
+
+export const FileIconContainer = styled.View`
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  margin-top: ${(props: ThemeProps) => props.theme.spacing.xxl}px;
+  border-radius: 70px;
+  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  padding: ${(props: ThemeProps) => props.theme.spacing.md}px;
 `;

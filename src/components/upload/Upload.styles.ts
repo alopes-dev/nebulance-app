@@ -139,6 +139,7 @@ export const Title = styled.Text`
   font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
   font-weight: ${(props: ThemeProps) => props.theme.fontWeights.medium};
   color: ${(props: ThemeProps) => props.theme.colors.text};
+  max-width: 70%;
 `;
 
 export const Amount = styled.Text<{ isExpense: boolean }>`

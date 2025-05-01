@@ -18,10 +18,8 @@ import * as S from "./AddFundsModal.styles";
 import { useTheme } from "@/context/ThemeContext";
 import * as Haptics from "expo-haptics";
 import SuccessScreen from "../success-screen/SuccessScreen";
-import { intlFormat } from "date-fns";
 import { formatCurrency } from "@/helpers";
-import Toast from "react-native-toast-message";
-import { NebulaToast } from "../toast/toast";
+import { NebulaToast } from "../toast/Toast";
 
 interface AddFundsModalProps {
   goalTitle: string;

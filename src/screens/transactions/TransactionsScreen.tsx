@@ -28,6 +28,8 @@ const TransactionsScreen = () => {
     return (
       filter === "all"
         ? transactions
+        : filter === "pending"
+        ? transactions?.filter((t) => t.status === "PENDING")
         : transactions?.filter((t) => t.type?.toLowerCase() === filter)
     )?.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [filter, transactions]);
@@ -102,6 +104,12 @@ const TransactionsScreen = () => {
             onPress={() => handleChangeFilter("expense")}
           >
             <S.FilterText active={filter === "expense"}>Expense</S.FilterText>
+          </S.FilterButton>
+          <S.FilterButton
+            active={filter === "pending"}
+            onPress={() => handleChangeFilter("pending")}
+          >
+            <S.FilterText active={filter === "pending"}>Pending</S.FilterText>
           </S.FilterButton>
         </S.FilterContainer>
 
