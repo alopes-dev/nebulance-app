@@ -17,6 +17,8 @@ type AuthStackParamList = {
   PasswordRecovery: undefined;
 };
 
+//improvement, add zod validation and form manage lib
+
 type PasswordRecoveryScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
   "PasswordRecovery"

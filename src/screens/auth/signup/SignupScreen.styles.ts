@@ -89,12 +89,22 @@ export const SignupButton = styled.TouchableOpacity`
   border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
   align-items: center;
   margin-bottom: ${(props: ThemeProps) => props.theme.spacing.lg}px;
+  flex-direction: row;
+  justify-content: center;
+  gap: ${(props: ThemeProps) => props.theme.spacing.md}px;
 `;
 
 export const SignupButtonText = styled.Text`
   color: white;
   font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
   font-weight: ${(props: ThemeProps) => props.theme.fontWeights.semiBold};
+`;
+
+export const ErrorText = styled.Text`
+  color: ${(props: ThemeProps) => props.theme.colors.danger};
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.sm}px;
+  margin-top: ${(props: ThemeProps) => props.theme.spacing.xs}px;
+  margin-bottom: ${(props: ThemeProps) => props.theme.spacing.sm}px;
 `;
 
 export const OrContainer = styled.View`
@@ -106,19 +116,13 @@ export const OrContainer = styled.View`
 export const OrLine = styled.View`
   flex: 1;
   height: 1px;
-  background-color: ${(props: ThemeProps) => props.theme.colors.card};
+  background-color: ${(props: ThemeProps) => props.theme.colors.border};
 `;
 
 export const OrText = styled.Text`
-  margin: 0 ${(props: ThemeProps) => props.theme.spacing.md}px;
+  margin-horizontal: ${(props: ThemeProps) => props.theme.spacing.md}px;
   color: ${(props: ThemeProps) => props.theme.colors.textSecondary};
   font-size: ${(props: ThemeProps) => props.theme.fontSizes.sm}px;
-`;
-
-export const SocialButtonsContainer = styled.View`
-  flex-direction: row;
-  justify-content: space-around;
-  margin-bottom: ${(props: ThemeProps) => props.theme.spacing.lg}px;
 `;
 
 export const LoginContainer = styled.View`
@@ -128,15 +132,15 @@ export const LoginContainer = styled.View`
 `;
 
 export const LoginText = styled.Text`
-  font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
   color: ${(props: ThemeProps) => props.theme.colors.textSecondary};
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
   margin-right: ${(props: ThemeProps) => props.theme.spacing.xs}px;
 `;
 
 export const LoginButton = styled.TouchableOpacity``;
 
 export const LoginButtonText = styled.Text`
-  font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
   color: ${(props: ThemeProps) => props.theme.colors.primary};
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
   font-weight: ${(props: ThemeProps) => props.theme.fontWeights.semiBold};
 `;

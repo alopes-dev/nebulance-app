@@ -1,11 +1,17 @@
 import { useMutation } from "@tanstack/react-query";
 import { storage } from "@/utils/storage";
 import * as Haptics from "expo-haptics";
-import { authLogin, authUser } from "@/services/auth";
+import { authLogin, authRegister, authUser } from "@/services/auth";
 import { useEffect } from "react";
 import { getAccountInfo } from "@/services/getAccountInfo";
 
 export type LoginCredentials = {
+  email: string;
+  password: string;
+};
+
+export type RegisterCredentials = {
+  name: string;
   email: string;
   password: string;
 };
@@ -30,6 +36,19 @@ export const useAuthQueries = () => {
     },
     retry: false,
   });
+
+  // Register mutation
+  const { mutateAsync: mutateRegister, isPending: isRegistering } = useMutation(
+    {
+      mutationFn: async (payload: RegisterCredentials) => authRegister(payload),
+      onSuccess: () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      },
+      onError: () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      },
+    }
+  );
 
   const {
     data: accountInfo,
@@ -93,5 +112,7 @@ export const useAuthQueries = () => {
     accountInfo,
     isCheckingAccountInfo,
     refreshAccountInfo: mutateCheckAccountInfo,
+    mutateRegister,
+    isRegistering,
   };
 };

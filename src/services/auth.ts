@@ -5,6 +5,15 @@ export const authLogin = async (email: string, password: string) => {
   return response.data;
 };
 
+export const authRegister = async (payload: {
+  name: string;
+  email: string;
+  password: string;
+}) => {
+  const response = await apiServer.post("/register", payload);
+  return response.data;
+};
+
 export const authUser = async () => {
   const response = await apiServer.get("/me");
   return response.data;

@@ -6,8 +6,9 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useAuthQueries } from "@/hooks/useAuthQueries";
+import { RegisterCredentials, useAuthQueries } from "@/hooks/useAuthQueries";
 import { IAccount, IUser } from "@/types";
+import Toast from "react-native-toast-message";
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -21,6 +22,11 @@ type AuthContextType = {
   refreshAccountInfo?: () => Promise<void>;
   currency: string;
   handleSetCurrency: (currency: string) => void;
+  handleRegister: (
+    payload: RegisterCredentials,
+    onSuccess: () => void
+  ) => Promise<void>;
+  isRegistering: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -32,6 +38,8 @@ const AuthContext = createContext<AuthContextType>({
   isCheckingAuth: true,
   currency: "USD",
   handleSetCurrency: () => {},
+  handleRegister: async () => {},
+  isRegistering: false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -50,6 +58,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     accountInfo,
     isCheckingAccountInfo,
     refreshAccountInfo,
+    mutateRegister,
+    isRegistering,
   } = useAuthQueries();
 
   const handleLogin = useCallback(
@@ -63,6 +73,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setCurrency(currency);
   }, []);
 
+  const handleRegister = useCallback(
+    (payload: RegisterCredentials, onSuccess: () => void) =>
+      mutateRegister(payload, {
+        onSuccess: () => {
+          onSuccess();
+        },
+        onError: (error) => {
+          Toast.show({
+            text1: "Error registering",
+            text2: error.message,
+            type: "error",
+            position: "bottom",
+          });
+        },
+      }),
+    [mutateRegister]
+  );
   const values = useMemo(
     () => ({
       isAuthenticated: !!user,
@@ -76,6 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       refreshAccountInfo,
       currency,
       handleSetCurrency,
+      handleRegister,
+      isRegistering,
     }),
     [
       user,
@@ -89,6 +118,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       refreshAccountInfo,
       currency,
       handleSetCurrency,
+      handleRegister,
+      isRegistering,
     ]
   );
 
