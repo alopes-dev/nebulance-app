@@ -63,7 +63,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   } = useAuthQueries();
 
   const handleLogin = useCallback(
-    (email: string, password: string) => mutateLogin({ email, password }),
+    (email: string, password: string) =>
+      mutateLogin(
+        { email, password },
+        {
+          onError: (error) => {
+            Toast.show({
+              text1: "Error logging in",
+              text2: error.message,
+              type: "error",
+              position: "bottom",
+            });
+          },
+        }
+      ),
     [mutateLogin]
   );
 

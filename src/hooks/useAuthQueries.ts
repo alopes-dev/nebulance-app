@@ -34,6 +34,9 @@ export const useAuthQueries = () => {
     onSuccess: (data) => {
       mutateCheckAccountInfo();
     },
+    onError: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
     retry: false,
   });
 
@@ -75,7 +78,7 @@ export const useAuthQueries = () => {
       mutateCheckAuth();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
-    onError: () => {
+    onError: (error) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });

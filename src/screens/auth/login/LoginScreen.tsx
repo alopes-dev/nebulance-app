@@ -18,13 +18,14 @@ import { useTheme } from "@/context/ThemeContext";
 
 import * as S from "./LoginScreen.styles";
 import { useAuth } from "@/context/AuthContext";
+import { NebulaToast } from "@/components/toast/Toast";
 
 // Define the login form schema
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters")
+    // .min(8, "Password must be at least 8 characters")
     .max(50, "Password is too long"),
   rememberMe: z.boolean(),
 });
@@ -189,6 +190,7 @@ const LoginScreen = () => {
             </S.SignupContainer>
           </S.Container>
         </S.RootContainer>
+        <NebulaToast />
       </ScrollView>
     </KeyboardAvoidingView>
   );
