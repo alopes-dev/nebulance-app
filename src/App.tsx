@@ -10,9 +10,10 @@ import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import MainNavigator from "./navigation/MainNavigator";
 import LottieView from "lottie-react-native";
+import OnboardingNavigator from "./screens/onboarding/OnboardingNavigator";
 
 function AppContent() {
-  const { isAuthenticated, isCheckingAuth } = useAuth();
+  const { isAuthenticated, user, isCheckingAuth, onboardingStatus } = useAuth();
   const { isDarkMode, theme } = useTheme();
 
   if (isCheckingAuth) {
@@ -59,7 +60,15 @@ function AppContent() {
         backgroundColor={theme.colors.background}
       />
 
-      {isAuthenticated ? <MainNavigator /> : <AuthNavigator />}
+      {isAuthenticated ? (
+        onboardingStatus === "COMPLETE" ? (
+          <MainNavigator />
+        ) : (
+          <OnboardingNavigator />
+        )
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 }

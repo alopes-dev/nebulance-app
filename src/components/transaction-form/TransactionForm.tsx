@@ -93,7 +93,7 @@ const TransactionForm = ({
           height: 8,
         },
         shadowOpacity: 1,
-        shadowRadius: 24,
+        shadowRadius: 8,
         elevation: 64,
       }}
       handleIndicatorStyle={{

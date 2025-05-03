@@ -3,7 +3,12 @@ import { storage } from "@/utils/storage";
 import * as Haptics from "expo-haptics";
 import { authLogin, authRegister, authUser } from "@/services/auth";
 import { useEffect } from "react";
-import { getAccountInfo } from "@/services/getAccountInfo";
+import {
+  createAccount,
+  getAccountInfo,
+  updateAccountInfo,
+} from "@/services/getAccountInfo";
+import { IAccount, IUser } from "@/types";
 
 export type LoginCredentials = {
   email: string;
@@ -14,6 +19,12 @@ export type RegisterCredentials = {
   name: string;
   email: string;
   password: string;
+};
+
+export type CreateAccountCredentials = {
+  name: string;
+  type: string;
+  currencyStyle: string;
 };
 
 export const useAuthQueries = () => {
@@ -83,6 +94,42 @@ export const useAuthQueries = () => {
     },
   });
 
+  // Account mutation
+  const { mutateAsync: mutateCreateAccount, isPending: isCreatingAccount } =
+    useMutation({
+      mutationFn: async (payload: CreateAccountCredentials) =>
+        createAccount({
+          ...payload,
+          userId: user?.id,
+        }),
+      onSuccess: (data) => {
+        mutateCheckAuth();
+        mutateCheckAccountInfo();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      },
+      onError: (error) => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      },
+    });
+
+  // Account mutation
+  const { mutateAsync: mutateUpdateAccount, isPending: isUpdatingAccount } =
+    useMutation({
+      mutationFn: async (payload: IAccount) =>
+        updateAccountInfo({
+          ...payload,
+          userId: user?.id,
+        }),
+      onSuccess: (data) => {
+        mutateCheckAuth();
+        mutateCheckAccountInfo();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      },
+      onError: (error) => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      },
+    });
+
   // Logout mutation
   const { mutateAsync: mutateLogout, isPending: isLoggingOut } = useMutation({
     mutationFn: async () => {
@@ -106,16 +153,20 @@ export const useAuthQueries = () => {
   }, []);
 
   return {
-    user,
+    user: user as IUser,
     isCheckingAuth,
     mutateLogin,
     mutateLogout,
     isLoggingIn,
     isLoggingOut,
-    accountInfo,
+    accountInfo: accountInfo as IUser,
     isCheckingAccountInfo,
     refreshAccountInfo: mutateCheckAccountInfo,
+    mutateCreateAccount,
+    isCreatingAccount,
     mutateRegister,
     isRegistering,
+    mutateUpdateAccount,
+    isUpdatingAccount,
   };
 };
