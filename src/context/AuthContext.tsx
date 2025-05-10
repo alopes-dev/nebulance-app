@@ -22,9 +22,9 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isCheckingAuth: boolean;
-  accountInfo: IUser | null;
+  accountInfo?: IAccount;
   isCheckingAccountInfo?: boolean;
-  refreshAccountInfo?: () => Promise<IUser | null>;
+  refreshAccountInfo?: () => Promise<IAccount | null>;
   currency: string;
   handleSetCurrency: (currency: string) => void;
   handleRegister: (
@@ -34,7 +34,7 @@ type AuthContextType = {
   isRegistering: boolean;
   onboardingStatus: TOnboardingStatus;
   handleCreateAccount: (
-    payload: Pick<IAccount, "name" | "type" | "currencyStyle">,
+    payload: CreateAccountCredentials,
     onSuccess: () => void
   ) => Promise<IAccount>;
   isCreatingAccount: boolean;
@@ -56,7 +56,7 @@ const AuthContext = createContext<AuthContextType>({
   handleSetCurrency: () => {},
   handleRegister: async () => {},
   isRegistering: false,
-  accountInfo: null,
+  accountInfo: undefined,
   isCheckingAccountInfo: false,
   refreshAccountInfo: async () => null,
   onboardingStatus: "ACCOUNT_CREATION",
@@ -193,7 +193,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       isLoading: isLoggingIn || isLoggingOut,
       login: handleLogin,
       logout: handleLogout,
-      accountInfo: accountInfo as IUser,
+      accountInfo: accountInfo as IAccount,
       isCheckingAccountInfo,
       refreshAccountInfo,
       currency,
