@@ -102,6 +102,7 @@ const GoalDetailScreen = () => {
   const handleAddOrWithdraw = (action: "add" | "withdraw" | "details") => {
     setActionType(action);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    bottomSheetModalRef.current?.dismiss();
     if (bottomSheetModalRef.current) {
       bottomSheetModalRef.current.present();
     }
@@ -214,6 +215,11 @@ const GoalDetailScreen = () => {
         isLoading={isAddingAmount || isWithdrawingAmount}
         targetAmount={goal?.targetAmount ?? 0}
         currentAmount={accountInfo?.balance ?? 0}
+        onSuccess={() => {
+          handleGetGoal(goalId);
+          refetch();
+          bottomSheetModalRef.current?.dismiss();
+        }}
       />
 
       <AddGoalModal

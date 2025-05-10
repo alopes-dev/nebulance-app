@@ -1,10 +1,9 @@
 import styled, { css } from "styled-components/native";
 import { ThemeProps } from "@/types";
 
-export const Container = styled.View`
+export const FormContainer = styled.View`
+  justify-content: space-between;
   flex: 1;
-  padding: ${(props: ThemeProps) => props.theme.spacing.lg}px;
-  background-color: ${(props: ThemeProps) => props.theme.colors.background};
 `;
 
 export const Header = styled.View`
@@ -78,16 +77,18 @@ export const AmountInput = styled.TextInput`
   padding: ${(props: ThemeProps) => props.theme.spacing.sm}px 0;
 `;
 
+export const Form = styled.View``;
+
 export const AddButton = styled.TouchableOpacity<{ disabled: boolean }>`
   background-color: ${(props: ThemeProps & { disabled: boolean }) =>
     props.disabled ? props.theme.colors.border : props.theme.colors.primary};
-  opacity: ${(props: { disabled: boolean }) => (props.disabled ? 0.5 : 1)};
-  padding: ${(props: ThemeProps) => props.theme.spacing.lg}px;
-  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.lg}px;
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.xxl}px;
+  padding: ${(props: ThemeProps) => props.theme.spacing.md}px;
   align-items: center;
+  margin-top: ${(props: ThemeProps) => props.theme.spacing.lg}px;
+  opacity: ${(props: { disabled: boolean }) => (props.disabled ? 0.5 : 1)};
   flex-direction: row;
   justify-content: center;
-  align-items: center;
   gap: ${(props: ThemeProps) => props.theme.spacing.sm}px;
 `;
 
@@ -102,4 +103,9 @@ export const ErrorText = styled.Text`
   font-size: ${(props: ThemeProps) => props.theme.fontSizes.sm}px;
   margin-top: ${(props: ThemeProps) => props.theme.spacing.xs}px;
   margin-bottom: ${(props: ThemeProps) => props.theme.spacing.md}px;
+`;
+
+export const FormActions = styled.View`
+  gap: ${(props: ThemeProps) => props.theme.spacing.md}px;
+  margin-bottom: ${(props: ThemeProps) => props.theme.spacing.lg}px;
 `;

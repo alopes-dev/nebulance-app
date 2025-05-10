@@ -251,6 +251,10 @@ const GoalsScreen = () => {
           isLoading={isAddingAmount || isWithdrawingAmount}
           targetAmount={selectedGoal?.targetAmount ?? 0}
           currentAmount={accountInfo?.balance ?? 0}
+          onSuccess={() => {
+            refreshGoals();
+            bottomSheetModalRef.current?.dismiss();
+          }}
         />
 
         <AddGoalModal

@@ -20,6 +20,8 @@ import * as Haptics from "expo-haptics";
 import SuccessScreen from "../successfly/successfly";
 import { formatCurrency } from "@/helpers";
 import { NebulaToast } from "../toast/Toast";
+import AppModal from "../app-modal/AppModal";
+import Successfly from "../successfly/successfly";
 
 interface AddFundsModalProps {
   goalTitle: string;
@@ -29,6 +31,7 @@ interface AddFundsModalProps {
   isLoading: boolean;
   targetAmount: number;
   currentAmount: number;
+  onSuccess: () => void;
 }
 
 const AddFundsModal = ({
@@ -39,6 +42,7 @@ const AddFundsModal = ({
   isLoading,
   targetAmount,
   currentAmount,
+  onSuccess,
 }: AddFundsModalProps) => {
   const [amount, setAmount] = useState<number | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -48,23 +52,6 @@ const AddFundsModal = ({
   const shouldShowAddFunds = actionType === "add";
   const isWithdraw = actionType === "withdraw";
   const isAdd = actionType === "add";
-
-  const snapPoints = useMemo(() => ["50%"], []);
-
-  useEffect(() => {
-    const keyboardWillShow = Keyboard.addListener("keyboardWillShow", () => {
-      bottomSheetModalRef.current?.snapToPosition("65%");
-    });
-
-    const keyboardWillHide = Keyboard.addListener("keyboardWillHide", () => {
-      bottomSheetModalRef.current?.snapToPosition("50%");
-    });
-
-    return () => {
-      keyboardWillShow.remove();
-      keyboardWillHide.remove();
-    };
-  }, []);
 
   const validateWithdrawal = useCallback(() => {
     const isExceedingTarget = amount && amount > targetAmount;
@@ -96,8 +83,10 @@ const AddFundsModal = ({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (amount && amount > 0 && (!isWithdraw || amount <= targetAmount)) {
       onAddOrWithdrawFunds(amount, () => {
-        setShowSuccess(true);
-        bottomSheetSuccessModalRef.current?.present();
+        onSuccess();
+        setTimeout(() => {
+          setShowSuccess(true);
+        }, 300);
       });
     }
   };
@@ -110,157 +99,82 @@ const AddFundsModal = ({
 
   if (showSuccess) {
     return (
-      <BottomSheetModal
-        ref={bottomSheetSuccessModalRef}
-        index={0}
-        snapPoints={["100"]}
+      <Successfly
+        title={
+          shouldShowAddFunds
+            ? "Funds Added Successfully!"
+            : "Funds Withdrawn Successfully!"
+        }
+        description={`${
+          shouldShowAddFunds ? "Added" : "Withdrawn"
+        } $${amount?.toLocaleString()} to ${goalTitle}`}
+        icon={shouldShowAddFunds ? "checkmark-circle" : "arrow-up-circle"}
         onDismiss={handleDismissSuccess}
-        backgroundStyle={{
-          backgroundColor: theme.colors.background,
-          borderRadius: 24,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 8,
-          },
-          shadowOpacity: 1,
-          shadowRadius: 8,
-          elevation: 64,
-        }}
-        handleIndicatorStyle={{
-          backgroundColor: theme.colors.text,
-          width: 40,
-          height: 4,
-          borderRadius: 4,
-          display: "none",
-        }}
-        enablePanDownToClose={false}
-        enableDynamicSizing={false}
-        enableOverDrag={false}
-      >
-        <SuccessScreen
-          title={
-            shouldShowAddFunds
-              ? "Funds Added Successfully!"
-              : "Funds Withdrawn Successfully!"
-          }
-          description={`${
-            shouldShowAddFunds ? "Added" : "Withdrawn"
-          } $${amount?.toLocaleString()} to ${goalTitle}`}
-          icon={shouldShowAddFunds ? "checkmark-circle" : "arrow-up-circle"}
-          onDismiss={handleDismissSuccess}
-        />
-      </BottomSheetModal>
+      />
     );
   }
 
   return (
-    <BottomSheetModal
-      ref={bottomSheetModalRef}
-      index={0}
-      snapPoints={snapPoints}
-      onDismiss={() => {
-        setAmount(null);
-        bottomSheetModalRef.current?.dismiss();
-      }}
-      backgroundStyle={{
-        backgroundColor: theme.colors.background,
-        borderRadius: 24,
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 8,
-        },
-        shadowOpacity: 1,
-        shadowRadius: 8,
-        elevation: 64,
-      }}
-      handleIndicatorStyle={{
-        backgroundColor: theme.colors.text,
-        width: 40,
-        height: 4,
-        borderRadius: 4,
-      }}
-      enablePanDownToClose
-      enableDynamicSizing={false}
-      enableOverDrag
-      keyboardBehavior="extend"
-      android_keyboardInputMode="adjustResize"
-      keyboardBlurBehavior="restore"
-      enableHandlePanningGesture
+    <AppModal
+      bottomSheetModalRef={bottomSheetModalRef}
+      title={shouldShowAddFunds ? "Add Funds" : "Withdraw Funds"}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <BottomSheetScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          <S.Container>
-            <S.Header>
-              <S.HeaderTitle>
-                {shouldShowAddFunds ? "Add Funds" : "Withdraw Funds"}
-              </S.HeaderTitle>
-              <S.CloseButton
-                onPress={() => bottomSheetModalRef.current?.dismiss()}
-              >
-                <Ionicons name="close" size={24} color={theme.colors.text} />
-              </S.CloseButton>
-            </S.Header>
+      <S.FormContainer>
+        <S.Form>
+          <S.GoalInfo>
+            <S.GoalTitle>{goalTitle}</S.GoalTitle>
+            <S.GoalSubtitle>
+              {shouldShowAddFunds
+                ? "Enter amount to add"
+                : "Enter amount to withdraw"}
+            </S.GoalSubtitle>
+          </S.GoalInfo>
 
-            <S.GoalInfo>
-              <S.GoalTitle>{goalTitle}</S.GoalTitle>
-              <S.GoalSubtitle>
-                {shouldShowAddFunds
-                  ? "Enter amount to add"
-                  : "Enter amount to withdraw"}
-              </S.GoalSubtitle>
-            </S.GoalInfo>
+          <S.InputContainer error={!!error}>
+            <CurrencyInput
+              value={amount}
+              onChangeValue={setAmount}
+              prefix="$"
+              delimiter=","
+              separator="."
+              precision={2}
+              minValue={0}
+              maxValue={999999999.99}
+              placeholder="$0.00"
+              placeholderTextColor={theme.colors.text}
+              keyboardType="decimal-pad"
+              autoFocus
+              style={{
+                fontSize: 30,
+                color: theme.colors.text,
+                flex: 1,
+                fontWeight: "bold",
+                textAlign: "left",
+                padding: 12,
+              }}
+            />
+          </S.InputContainer>
 
-            <S.InputContainer error={!!error}>
-              <CurrencyInput
-                value={amount}
-                onChangeValue={setAmount}
-                prefix="$"
-                delimiter=","
-                separator="."
-                precision={2}
-                minValue={0}
-                maxValue={999999999.99}
-                placeholder="$0.00"
-                placeholderTextColor={theme.colors.text}
-                keyboardType="decimal-pad"
-                autoFocus
-                style={{
-                  fontSize: 30,
-                  color: theme.colors.text,
-                  flex: 1,
-                  fontWeight: "bold",
-                  textAlign: "left",
-                  padding: 12,
-                }}
-              />
-            </S.InputContainer>
+          {error && <S.ErrorText>{error}</S.ErrorText>}
+        </S.Form>
 
-            {error && <S.ErrorText>{error}</S.ErrorText>}
+        <S.FormActions>
+          <S.AddButton
+            onPress={handleAddOrWithdrawFunds}
+            disabled={isLoading || !!error}
+          >
+            <S.AddButtonText>
+              {shouldShowAddFunds ? "Add Funds" : "Withdraw Funds"}
+            </S.AddButtonText>
+            {isLoading && (
+              <ActivityIndicator size="small" color={theme.colors.text} />
+            )}
+          </S.AddButton>
+        </S.FormActions>
 
-            <S.AddButton
-              onPress={handleAddOrWithdrawFunds}
-              disabled={isLoading || !!error}
-            >
-              <S.AddButtonText>
-                {shouldShowAddFunds ? "Add Funds" : "Withdraw Funds"}
-              </S.AddButtonText>
-              {isLoading && (
-                <ActivityIndicator size="small" color={theme.colors.text} />
-              )}
-            </S.AddButton>
-          </S.Container>
-          <NebulaToast />
-        </BottomSheetScrollView>
-      </KeyboardAvoidingView>
-    </BottomSheetModal>
+        <NebulaToast />
+      </S.FormContainer>
+    </AppModal>
   );
 };
 

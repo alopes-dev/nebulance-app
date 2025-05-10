@@ -194,7 +194,7 @@ const TransactionUploadScreen = () => {
             </S.StepDescription>
 
             <S.SourcesGrid>
-              <FileSourceCard
+              {/* <FileSourceCard
                 title="CSV File"
                 icon="document-text"
                 selected={selectedSource === "csv"}
@@ -207,7 +207,7 @@ const TransactionUploadScreen = () => {
                 selected={selectedSource === "ofx"}
                 onPress={() => handleSourceSelect("ofx")}
                 disabled={isProcessing}
-              />
+              /> */}
               <FileSourceCard
                 title="PDF Statement"
                 icon="document-attach"
