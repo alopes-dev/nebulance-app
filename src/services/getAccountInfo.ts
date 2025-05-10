@@ -1,10 +1,10 @@
 import apiServer from "./api";
 import { IAccount, IUser } from "@/types";
 
-export const getAccountInfo = async (): Promise<IUser> => {
+export const getAccountInfo = async (): Promise<IAccount> => {
   const response = await apiServer.get("/accounts/me");
 
-  return response.data as IUser;
+  return response.data as IAccount;
 };
 
 export const updateAccountInfo = async (

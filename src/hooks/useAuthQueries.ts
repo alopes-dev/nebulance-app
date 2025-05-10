@@ -25,6 +25,7 @@ export type CreateAccountCredentials = {
   name: string;
   type: string;
   currencyStyle: string;
+  id?: string;
 };
 
 export const useAuthQueries = () => {
@@ -159,7 +160,7 @@ export const useAuthQueries = () => {
     mutateLogout,
     isLoggingIn,
     isLoggingOut,
-    accountInfo: accountInfo as IUser,
+    accountInfo: accountInfo as IAccount,
     isCheckingAccountInfo,
     refreshAccountInfo: mutateCheckAccountInfo,
     mutateCreateAccount,
