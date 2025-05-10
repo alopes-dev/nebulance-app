@@ -12,12 +12,15 @@ export const InputLabel = styled.Text`
   margin-bottom: ${(props: ThemeProps) => props.theme.spacing.xs}px;
 `;
 
-export const InputWrapper = styled.View`
+export const InputWrapper = styled.View<{ hasError?: boolean }>`
   flex-direction: row;
   align-items: center;
   background-color: ${(props: ThemeProps) => props.theme.colors.card};
   border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
   overflow: hidden;
+  border-width: 1px;
+  border-color: ${(props: ThemeProps & { hasError?: boolean }) =>
+    props.hasError ? props.theme.colors.danger : "transparent"};
 `;
 
 export const IconContainer = styled.View`
@@ -32,6 +35,7 @@ export const RightIconContainer = styled.View`
 export const StyledTextInput = styled.TextInput<{
   hasIcon: boolean;
   hasRightIcon: boolean;
+  hasError?: boolean;
 }>`
   flex: 1;
   height: 50px;
@@ -42,4 +46,10 @@ export const StyledTextInput = styled.TextInput<{
     props.hasRightIcon ? 0 : props.theme.spacing.md}px;
   font-size: ${(props: ThemeProps) => props.theme.fontSizes.md}px;
   color: ${(props: ThemeProps) => props.theme.colors.text};
+`;
+
+export const ErrorText = styled.Text`
+  color: ${(props: ThemeProps) => props.theme.colors.danger};
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.sm}px;
+  margin-top: ${(props: ThemeProps) => props.theme.spacing.xs}px;
 `;

@@ -1,9 +1,11 @@
 import axios from "axios";
 import { storage } from "@/utils/storage";
 
+const baseURL =
+  process.env.URI || "https://nebulance-staging-644806259a5e.herokuapp.com/";
 // Create axios instance with base URL from environment variable
 const api = axios.create({
-  baseURL: process.env.URI || "https://nebulance-api.onrender.com",
+  baseURL: baseURL,
   headers: {
     "Content-Type": "application/json",
   },

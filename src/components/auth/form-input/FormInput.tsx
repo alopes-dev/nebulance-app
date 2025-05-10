@@ -19,6 +19,7 @@ interface FormInputProps {
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   icon?: string;
   rightIcon?: React.ReactNode;
+  error?: string;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -31,13 +32,14 @@ const FormInput: React.FC<FormInputProps> = ({
   autoCapitalize = "sentences",
   icon,
   rightIcon,
+  error,
 }) => {
   const { theme } = useTheme();
 
   return (
     <S.InputContainer>
       <S.InputLabel>{label}</S.InputLabel>
-      <S.InputWrapper>
+      <S.InputWrapper hasError={!!error}>
         {icon && (
           <S.IconContainer>
             <Ionicons
@@ -57,9 +59,11 @@ const FormInput: React.FC<FormInputProps> = ({
           autoCapitalize={autoCapitalize}
           hasIcon={!!icon}
           hasRightIcon={!!rightIcon}
+          hasError={!!error}
         />
         {rightIcon && <S.RightIconContainer>{rightIcon}</S.RightIconContainer>}
       </S.InputWrapper>
+      {error && <S.ErrorText>{error}</S.ErrorText>}
     </S.InputContainer>
   );
 };

@@ -9,12 +9,30 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { StackNavigationProp } from "@react-navigation/stack";
+import { z } from "zod";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/auth/form-input/FormInput";
-import SocialButton from "@/components/auth/social-button/SocialButton";
+
 import { useTheme } from "@/context/ThemeContext";
 
 import * as S from "./LoginScreen.styles";
 import { useAuth } from "@/context/AuthContext";
+import { NebulaToast } from "@/components/toast/Toast";
+
+// Define the login form schema
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z
+    .string()
+    // .min(8, "Password must be at least 8 characters")
+    .max(50, "Password is too long"),
+  rememberMe: z.boolean(),
+});
+
+// Infer the type from the schema
+type LoginFormData = z.infer<typeof loginSchema>;
+
 type AuthStackParamList = {
   Login: undefined;
   Signup: undefined;
@@ -28,20 +46,30 @@ type LoginScreenNavigationProp = StackNavigationProp<
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const { theme } = useTheme();
   const { login, isLoading } = useAuth();
 
-  const isDisabled = useMemo(() => {
-    return !email || !password || isLoading;
-  }, [email, password, isLoading]);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+    watch,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+  });
 
-  const handleLogin = () => {
-    login(email, password);
+  const onSubmit = (payload: any) => {
+    login(payload.email, payload.password);
   };
+
+  const isDisabled = useMemo(() => !isValid || isLoading, [isValid, isLoading]);
 
   return (
     <KeyboardAvoidingView
@@ -66,57 +94,77 @@ const LoginScreen = () => {
             </S.WelcomeContainer>
 
             <S.FormContainer>
-              <FormInput
-                label="Email"
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Enter your email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                icon="mail-outline"
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, value } }) => (
+                  <FormInput
+                    label="Email"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder="Enter your email"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    icon="mail-outline"
+                    error={errors.email?.message}
+                  />
+                )}
               />
 
-              <FormInput
-                label="Password"
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Enter your password"
-                secureTextEntry={!showPassword}
-                icon="lock-closed-outline"
-                rightIcon={
-                  <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
-                  >
-                    <Ionicons
-                      name={showPassword ? "eye-off-outline" : "eye-outline"}
-                      size={20}
-                      color={theme.colors.textSecondary}
-                    />
-                  </TouchableOpacity>
-                }
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, value } }) => (
+                  <FormInput
+                    label="Password"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder="Enter your password"
+                    secureTextEntry={!showPassword}
+                    icon="lock-closed-outline"
+                    error={errors.password?.message}
+                    rightIcon={
+                      <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}
+                      >
+                        <Ionicons
+                          name={
+                            showPassword ? "eye-off-outline" : "eye-outline"
+                          }
+                          size={20}
+                          color={theme.colors.textSecondary}
+                        />
+                      </TouchableOpacity>
+                    }
+                  />
+                )}
               />
 
               <S.OptionsRow>
-                <S.RememberMeContainer
-                  onPress={() => setRememberMe(!rememberMe)}
-                >
-                  <S.CheckboxContainer>
-                    {rememberMe ? (
-                      <Ionicons
-                        name="checkbox"
-                        size={20}
-                        color={theme.colors.primary}
-                      />
-                    ) : (
-                      <Ionicons
-                        name="square-outline"
-                        size={20}
-                        color={theme.colors.textSecondary}
-                      />
-                    )}
-                  </S.CheckboxContainer>
-                  <S.RememberMeText>Remember me</S.RememberMeText>
-                </S.RememberMeContainer>
+                <Controller
+                  control={control}
+                  name="rememberMe"
+                  render={({ field: { onChange, value } }) => (
+                    <S.RememberMeContainer onPress={() => onChange(!value)}>
+                      <S.CheckboxContainer>
+                        {value ? (
+                          <Ionicons
+                            name="checkbox"
+                            size={20}
+                            color={theme.colors.primary}
+                          />
+                        ) : (
+                          <Ionicons
+                            name="square-outline"
+                            size={20}
+                            color={theme.colors.textSecondary}
+                          />
+                        )}
+                      </S.CheckboxContainer>
+                      <S.RememberMeText>Remember me</S.RememberMeText>
+                    </S.RememberMeContainer>
+                  )}
+                />
 
                 <S.ForgotPasswordButton
                   onPress={() => navigation.navigate("PasswordRecovery")}
@@ -125,22 +173,13 @@ const LoginScreen = () => {
                 </S.ForgotPasswordButton>
               </S.OptionsRow>
 
-              <S.LoginButton onPress={handleLogin} disabled={isDisabled}>
+              <S.LoginButton
+                onPress={handleSubmit(onSubmit)}
+                disabled={isDisabled}
+              >
                 <S.LoginButtonText>Sign In</S.LoginButtonText>
                 {isLoading && <ActivityIndicator size="small" color="white" />}
               </S.LoginButton>
-
-              <S.OrContainer>
-                <S.OrLine />
-                <S.OrText>OR</S.OrText>
-                <S.OrLine />
-              </S.OrContainer>
-
-              <S.SocialButtonsContainer>
-                <SocialButton icon="logo-google" color="#DB4437" />
-                <SocialButton icon="logo-apple" color="#000000" />
-                <SocialButton icon="logo-facebook" color="#4267B2" />
-              </S.SocialButtonsContainer>
             </S.FormContainer>
 
             <S.SignupContainer>
@@ -151,6 +190,7 @@ const LoginScreen = () => {
             </S.SignupContainer>
           </S.Container>
         </S.RootContainer>
+        <NebulaToast />
       </ScrollView>
     </KeyboardAvoidingView>
   );

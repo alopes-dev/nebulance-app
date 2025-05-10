@@ -11,6 +11,12 @@ export const NebulaToast = () => {
             <S.ErrorToastText>{text2}</S.ErrorToastText>
           </S.ErrorToast>
         ),
+        success: ({ text1, text2 }) => (
+          <S.SuccessToast>
+            <S.SuccessToastText>{text1}</S.SuccessToastText>
+            <S.SuccessToastText>{text2}</S.SuccessToastText>
+          </S.SuccessToast>
+        ),
       }}
     />
   );

@@ -19,3 +19,15 @@ export const ErrorToastText = styled.Text`
   color: ${(props: ThemeProps) => props.theme.colors.text};
   font-size: ${(props: ThemeProps) => props.theme.fontSizes.sm}px;
 `;
+
+export const SuccessToast = styled.View`
+  background-color: ${(props: ThemeProps) => props.theme.colors.success};
+  padding: ${(props: ThemeProps) => props.theme.spacing.md}px;
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
+  width: 90%;
+`;
+
+export const SuccessToastText = styled.Text`
+  color: ${(props: ThemeProps) => props.theme.colors.text};
+  font-size: ${(props: ThemeProps) => props.theme.fontSizes.sm}px;
+`;

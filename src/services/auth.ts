@@ -2,6 +2,16 @@ import apiServer from "./api";
 
 export const authLogin = async (email: string, password: string) => {
   const response = await apiServer.post("/login", { email, password });
+
+  return response.data;
+};
+
+export const authRegister = async (payload: {
+  name: string;
+  email: string;
+  password: string;
+}) => {
+  const response = await apiServer.post("/register", payload);
   return response.data;
 };
 
