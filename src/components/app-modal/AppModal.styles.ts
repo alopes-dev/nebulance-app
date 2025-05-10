@@ -7,9 +7,10 @@ export const BottomSheetModal = styled(GorhomBottomSheetModal)`
   flex: 1;
 `;
 
-export const FormContainer = styled.View`
-  justify-content: space-between;
+export const Container = styled.View`
   flex: 1;
+  padding: ${(props: ThemeProps) => props.theme.spacing.lg}px;
+  margin-top: ${(props: ThemeProps) => props.theme.spacing.lg}px;
 `;
 
 export const Header = styled.View`
@@ -56,7 +57,7 @@ export const DatePicker = styled(DateTimePicker)`
 export const CreateButton = styled.TouchableOpacity`
   background-color: ${(props: ThemeProps & { disabled: boolean }) =>
     props.disabled ? props.theme.colors.border : props.theme.colors.primary};
-  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.xxl}px;
+  border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
   padding: ${(props: ThemeProps) => props.theme.spacing.md}px;
   align-items: center;
   margin-top: ${(props: ThemeProps) => props.theme.spacing.lg}px;
@@ -78,9 +79,4 @@ export const InputContainer = styled.View`
   padding: ${(props: ThemeProps) => props.theme.spacing.sm}px;
   background-color: ${(props: ThemeProps) => props.theme.colors.card};
   border-radius: ${(props: ThemeProps) => props.theme.borderRadius.md}px;
-`;
-
-export const FormActions = styled.View`
-  gap: ${(props: ThemeProps) => props.theme.spacing.md}px;
-  margin-bottom: ${(props: ThemeProps) => props.theme.spacing.lg}px;
 `;

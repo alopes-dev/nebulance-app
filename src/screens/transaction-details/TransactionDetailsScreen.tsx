@@ -42,7 +42,7 @@ const TransactionDetailsScreen = () => {
           <Ionicons name={transaction.icon as any} size={30} color="#FFFFFF" />
         </S.IconContainer>
 
-        <S.Title>{transaction.title}</S.Title>
+        <S.Title>{transaction.description}</S.Title>
 
         <S.DetailRow>
           <S.Label>Amount</S.Label>

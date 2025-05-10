@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 import { IGoal } from "@/types";
 import * as S from "./AddGoalModal.styles";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, Keyboard } from "react-native";
 import CurrencyInput from "react-native-currency-input";
-import AppModal from "../app-modal/AppModal";
-import Successfly from "../successfly/successfly";
+import SuccessScreen from "../successfly/successfly";
 
 interface AddGoalModalProps {
   bottomSheetModalRef: React.RefObject<BottomSheetModal>;
@@ -17,7 +17,6 @@ interface AddGoalModalProps {
   ) => void;
   isLoading: boolean;
   goal?: IGoal;
-  onSuccess: () => void;
 }
 
 const AddGoalModal: React.FC<AddGoalModalProps> = ({
@@ -25,13 +24,30 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
   onSaveGoal,
   isLoading,
   goal,
-  onSuccess,
 }) => {
   const { theme, isDarkMode } = useTheme();
   const [name, setName] = useState("");
   const [targetAmount, setTargetAmount] = useState<number | null>(null);
   const [deadline, setDeadline] = useState(new Date());
   const [showSuccess, setShowSuccess] = useState(false);
+  const bottomSheetSuccessModalRef = useRef<BottomSheetModal>(null);
+
+  const snapPoints = useMemo(() => ["100%"], []);
+
+  // useEffect(() => {
+  //   const keyboardWillShow = Keyboard.addListener("keyboardWillShow", () => {
+  //     bottomSheetModalRef.current?.snapToPosition("100%");
+  //   });
+
+  //   const keyboardWillHide = Keyboard.addListener("keyboardWillHide", () => {
+  //     bottomSheetModalRef.current?.snapToPosition("100%");
+  //   });
+
+  //   return () => {
+  //     keyboardWillShow.remove();
+  //     keyboardWillHide.remove();
+  //   };
+  // }, []);
 
   const resetForm = () => {
     setName("");
@@ -50,18 +66,17 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
         deadline,
       },
       () => {
-        onSuccess();
-        setTimeout(() => {
-          setShowSuccess(true);
-        }, 100);
+        setShowSuccess(true);
+        bottomSheetSuccessModalRef.current?.present();
       }
     );
   };
 
   const handleDismissSuccess = () => {
-    bottomSheetModalRef.current?.dismiss();
     setShowSuccess(false);
     resetForm();
+    bottomSheetModalRef.current?.dismiss();
+    bottomSheetSuccessModalRef.current?.dismiss();
   };
 
   useEffect(() => {
@@ -75,28 +90,94 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
   const isFormValid = name && targetAmount && deadline;
 
   if (showSuccess) {
+    bottomSheetSuccessModalRef.current?.present();
     return (
-      <Successfly
-        title={
-          isEditing
-            ? "Goal Updated Successfully!"
-            : "Goal Created Successfully!"
-        }
-        description={`${
-          isEditing ? "Updated" : "Created"
-        } goal "${name}" with target amount of $${targetAmount?.toLocaleString()}`}
-        icon="checkmark-circle"
+      <BottomSheetModal
+        ref={bottomSheetSuccessModalRef}
+        index={0}
+        snapPoints={["100"]}
         onDismiss={handleDismissSuccess}
-      />
+        backgroundStyle={{
+          backgroundColor: theme.colors.background,
+          borderRadius: 24,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 8,
+          },
+          shadowOpacity: 1,
+          shadowRadius: 8,
+          elevation: 64,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: theme.colors.text,
+          width: 40,
+          height: 4,
+          borderRadius: 4,
+          display: "none",
+        }}
+        enablePanDownToClose={false}
+        enableDynamicSizing={false}
+        enableOverDrag={false}
+      >
+        <SuccessScreen
+          title={
+            isEditing
+              ? "Goal Updated Successfully!"
+              : "Goal Created Successfully!"
+          }
+          description={`${
+            isEditing ? "Updated" : "Created"
+          } goal "${name}" with target amount of $${targetAmount?.toLocaleString()}`}
+          icon="checkmark-circle"
+          onDismiss={handleDismissSuccess}
+        />
+      </BottomSheetModal>
     );
   }
 
   return (
-    <AppModal
-      bottomSheetModalRef={bottomSheetModalRef}
-      title={isEditing ? "Edit Goal" : "Add New Goal"}
+    <S.BottomSheetModal
+      ref={bottomSheetModalRef}
+      index={0}
+      snapPoints={snapPoints}
+      onDismiss={() => {
+        bottomSheetModalRef.current?.dismiss();
+      }}
+      backgroundStyle={{
+        backgroundColor: theme.colors.background,
+        borderRadius: 24,
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 8,
+        },
+        shadowOpacity: 1,
+        shadowRadius: 8,
+        elevation: 64,
+      }}
+      handleIndicatorStyle={{
+        backgroundColor: theme.colors.text,
+        width: 40,
+        height: 4,
+        borderRadius: 4,
+      }}
+      enablePanDownToClose
+      enableDynamicSizing={false}
+      enableOverDrag
+      keyboardBehavior="extend"
+      android_keyboardInputMode="adjustResize"
+      keyboardBlurBehavior="restore"
+      enableHandlePanningGesture
     >
-      <S.FormContainer>
+      <S.Container>
+        <S.Header>
+          <S.Title>{isEditing ? "Edit Goal" : "Add New Goal"}</S.Title>
+          <S.CloseButton onPress={() => bottomSheetModalRef.current?.dismiss()}>
+            <Ionicons name="close" size={24} color={theme.colors.text} />
+          </S.CloseButton>
+        </S.Header>
+
         <S.Form>
           <S.Input
             placeholder="Goal name"
@@ -142,12 +223,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
             display="default"
             textColor={theme.colors.text}
             themeVariant={isDarkMode ? "dark" : "light"}
-            style={{
-              marginLeft: -8,
-            }}
           />
-        </S.Form>
-        <S.FormActions>
           <S.CreateButton
             onPress={handleSaveGoal}
             disabled={!isFormValid || isLoading}
@@ -159,9 +235,9 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
               <ActivityIndicator size="small" color={theme.colors.text} />
             )}
           </S.CreateButton>
-        </S.FormActions>
-      </S.FormContainer>
-    </AppModal>
+        </S.Form>
+      </S.Container>
+    </S.BottomSheetModal>
   );
 };
 

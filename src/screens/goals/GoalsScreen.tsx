@@ -257,6 +257,10 @@ const GoalsScreen = () => {
           bottomSheetModalRef={addGoalModalRef}
           onSaveGoal={handleCreateGoal}
           isLoading={isCreatingGoal}
+          onSuccess={() => {
+            refreshGoals();
+            addGoalModalRef.current?.dismiss();
+          }}
         />
       </S.Container>
     </S.RootContainer>

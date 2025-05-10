@@ -17,7 +17,7 @@ import CurrencyInput from "react-native-currency-input";
 import * as S from "./AddFundsModal.styles";
 import { useTheme } from "@/context/ThemeContext";
 import * as Haptics from "expo-haptics";
-import SuccessScreen from "../success-screen/SuccessScreen";
+import SuccessScreen from "../successfly/successfly";
 import { formatCurrency } from "@/helpers";
 import { NebulaToast } from "../toast/Toast";
 

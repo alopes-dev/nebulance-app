@@ -38,6 +38,8 @@ const GoalDetailScreen = () => {
     "add"
   );
 
+  const [selectedGoal, setSelectedGoal] = useState<IGoal | null>(null);
+
   const {
     deleteGoal,
     isDeletingGoal,
@@ -149,7 +151,10 @@ const GoalDetailScreen = () => {
           <S.HeaderTitle>{goal?.name}</S.HeaderTitle>
           <S.ActionButtonsContainer>
             <S.ActionButtons
-              onPress={() => editGoalModalRef.current?.present()}
+              onPress={() => {
+                setSelectedGoal(goal ?? null);
+                editGoalModalRef.current?.present();
+              }}
             >
               <EvilIcons
                 name="pencil"
@@ -215,7 +220,12 @@ const GoalDetailScreen = () => {
         bottomSheetModalRef={editGoalModalRef}
         onSaveGoal={handleEditGoal}
         isLoading={isUpdatingGoal}
-        goal={goal ?? undefined}
+        goal={selectedGoal ?? undefined}
+        onSuccess={() => {
+          handleGetGoal(goalId);
+          refetch();
+          editGoalModalRef.current?.dismiss();
+        }}
       />
     </S.RootContainer>
   );
